@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  AGENCY_ADMIN
+  BUSINESS_ADMIN
+  SELLER
+}
+
+enum QuestionType {
+  TEXT
+  MULTIPLE_CHOICE
+}
+
+enum ReviewOutcome {
+  REDIRECTED_GOOGLE
+  INTERNAL
+}
+
+model Agency {
+  id         String     @id @default(cuid())
+  name       String
+  createdAt  DateTime   @default(now())
+  businesses Business[]
+  users      User[]
+}
+
+model Business {
+  id              String     @id @default(cuid())
+  agencyId        String
+  agency          Agency     @relation(fields: [agencyId], references: [id])
+  name            String
+  slug            String     @unique
+  logoUrl         String?
+  googleReviewUrl String
+  starThreshold   Int        @default(5)
+  createdAt       DateTime   @default(now())
+  users           User[]
+  sellers         Seller[]
+  questions       Question[]
+  reviews         Review[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         Role
+  agencyId     String?
+  agency       Agency?   @relation(fields: [agencyId], references: [id])
+  businessId   String?
+  business     Business? @relation(fields: [businessId], references: [id])
+  seller       Seller?
+  createdAt    DateTime  @default(now())
+}
+
+model Seller {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  name       String
+  slug       String
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id])
+  reviews    Review[]
+
+  @@unique([businessId, slug])
+}
+
+model Question {
+  id         String       @id @default(cuid())
+  businessId String
+  business   Business     @relation(fields: [businessId], references: [id])
+  text       String
+  type       QuestionType @default(TEXT)
+  options    String[]     @default([])
+  order      Int
+  active     Boolean      @default(true)
+  answers    Answer[]
+}
+
+model Review {
+  id           String        @id @default(cuid())
+  businessId   String
+  business     Business      @relation(fields: [businessId], references: [id])
+  sellerId     String?
+  seller       Seller?       @relation(fields: [sellerId], references: [id])
+  starRating   Int
+  outcome      ReviewOutcome
+  comment      String?
+  contactName  String?
+  contactPhone String?
+  contactEmail String?
+  createdAt    DateTime      @default(now())
+  answers      Answer[]
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  reviewId   String
+  review     Review   @relation(fields: [reviewId], references: [id])
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  value      String
+}
