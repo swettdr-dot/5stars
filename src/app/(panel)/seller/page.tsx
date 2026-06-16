@@ -7,6 +7,7 @@ import {
   weeklyAverageTrend,
 } from "@/lib/metrics";
 import { qrDataUrl } from "@/lib/qr";
+import { getBaseUrl } from "@/lib/base-url";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { KpiCard, type KpiDir } from "@/components/ui/KpiCard";
@@ -41,7 +42,7 @@ export default async function SellerDashboard() {
   });
   if (!seller) return <p>Vendedor no encontrado.</p>;
 
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = await getBaseUrl();
   const link = `${base}/r/${seller.business.slug}/${seller.slug}`;
   const previewPath = `/r/${seller.business.slug}/${seller.slug}`;
   const qr = await qrDataUrl(link);
@@ -152,7 +153,7 @@ export default async function SellerDashboard() {
         <Card>
           <div className="text-card-title font-semibold text-ink">Mi enlace / QR</div>
           <div className="mb-3 mt-0.5 text-[12px] text-ink-3">
-            Compartí tu link o QR para que tus reseñas te queden atribuidas.
+            Comparte tu enlace o QR para que tus reseñas te queden atribuidas.
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="flex shrink-0 flex-col items-center gap-3">

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { qrDataUrl } from "@/lib/qr";
+import { getBaseUrl } from "@/lib/base-url";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { CopyButton } from "./_components/CopyButton";
@@ -19,7 +20,7 @@ export default async function QrPage() {
   ]);
   if (!business) return <p>Negocio no encontrado.</p>;
 
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = await getBaseUrl();
   const publicLink = `${base}/r/${business.slug}`;
   const qr = await qrDataUrl(publicLink);
 
