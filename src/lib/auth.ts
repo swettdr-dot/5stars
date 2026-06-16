@@ -1,13 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
+import { authConfig } from "@/lib/auth.config";
 
+// Runtime Node: config base edge-safe + el provider de credenciales (usa Prisma/bcrypt).
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
-  trustHost: true,
-  pages: { signIn: "/login" },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
@@ -27,28 +26,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        const u = user as { role: Role; agencyId: string | null; businessId: string | null };
-        token.role = u.role;
-        token.agencyId = u.agencyId;
-        token.businessId = u.businessId;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      const u = session.user as {
-        role?: Role;
-        agencyId?: string | null;
-        businessId?: string | null;
-        id?: string;
-      };
-      u.role = token.role as Role;
-      u.agencyId = (token.agencyId ?? null) as string | null;
-      u.businessId = (token.businessId ?? null) as string | null;
-      u.id = token.sub;
-      return session;
-    },
-  },
 });

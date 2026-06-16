@@ -1,12 +1,16 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
+
+// Middleware edge-safe: inicializa Auth.js solo con la config base (sin Prisma/bcrypt),
+// así el bundle del Edge se mantiene chico. Solo lee la sesión JWT para proteger rutas.
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const isPanel = ["/super", "/agency", "/business", "/seller"].some((p) =>
     req.nextUrl.pathname.startsWith(p),
   );
   if (isPanel && !req.auth) {
-    const url = new URL("/login", req.nextUrl.origin);
-    return Response.redirect(url);
+    return Response.redirect(new URL("/login", req.nextUrl.origin));
   }
 });
 
