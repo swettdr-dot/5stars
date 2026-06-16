@@ -14,9 +14,10 @@ async function ownBusinessId() {
 export type QuestionFormState = { ok: boolean; error?: string };
 
 const createSchema = z.object({
-  text: z.string().trim().min(1, "Escribí el texto de la pregunta."),
+  text: z.string().trim().min(1, "Escribe el texto de la pregunta."),
   type: z.enum(["TEXT", "MULTIPLE_CHOICE"]),
-  options: z.string().optional(),
+  // En "Texto abierto" el campo no se renderiza → FormData.get devuelve null.
+  options: z.string().nullish(),
 });
 
 export async function createQuestion(
@@ -38,7 +39,7 @@ export async function createQuestion(
       ? data.options.split(/\r?\n/).map((o) => o.trim()).filter(Boolean)
       : [];
   if (data.type === "MULTIPLE_CHOICE" && options.length === 0) {
-    return { ok: false, error: "Agregá al menos una opción (una por línea)." };
+    return { ok: false, error: "Agrega al menos una opción (una por línea)." };
   }
   const count = await prisma.question.count({ where: { businessId } });
   await prisma.question.create({
