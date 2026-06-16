@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { aggregateMetrics } from "@/lib/metrics";
 import { createBusiness } from "./actions";
 
 export default async function AgencyPage() {
@@ -10,8 +11,18 @@ export default async function AgencyPage() {
     include: { _count: { select: { reviews: true } } },
     orderBy: { createdAt: "desc" },
   });
+  const reviews = await prisma.review.findMany({
+    where: { business: { agencyId: user.agencyId } },
+    select: { starRating: true, outcome: true },
+  });
+  const m = aggregateMetrics(reviews);
   return (
     <div className="space-y-8">
+      <section className="grid grid-cols-3 gap-4">
+        <Stat label="Reviews" value={m.total} />
+        <Stat label="Promedio" value={m.average} />
+        <Stat label="A Google" value={m.redirected} />
+      </section>
       <section>
         <h1 className="mb-4 text-xl font-bold">Negocios</h1>
         <ul className="space-y-2">
@@ -32,6 +43,15 @@ export default async function AgencyPage() {
           <button className="rounded bg-black p-2 text-white">Crear</button>
         </form>
       </section>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded border p-4 text-center">
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xs text-gray-500">{label}</div>
     </div>
   );
 }

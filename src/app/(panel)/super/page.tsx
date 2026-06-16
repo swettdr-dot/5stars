@@ -5,12 +5,22 @@ import { createAgency } from "./actions";
 export default async function SuperPage() {
   const user = await requireUser();
   if (user.role !== "SUPER_ADMIN") return <p>No autorizado.</p>;
-  const agencies = await prisma.agency.findMany({
-    include: { _count: { select: { businesses: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [agencies, agencyCount, businessCount, reviewCount] = await Promise.all([
+    prisma.agency.findMany({
+      include: { _count: { select: { businesses: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.agency.count(),
+    prisma.business.count(),
+    prisma.review.count(),
+  ]);
   return (
     <div className="space-y-8">
+      <section className="grid grid-cols-3 gap-4">
+        <Stat label="Agencias" value={agencyCount} />
+        <Stat label="Negocios" value={businessCount} />
+        <Stat label="Reviews" value={reviewCount} />
+      </section>
       <section>
         <h1 className="mb-4 text-xl font-bold">Agencias</h1>
         <ul className="space-y-2">
@@ -30,6 +40,15 @@ export default async function SuperPage() {
           <button className="rounded bg-black p-2 text-white">Crear</button>
         </form>
       </section>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded border p-4 text-center">
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xs text-gray-500">{label}</div>
     </div>
   );
 }
