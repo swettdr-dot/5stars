@@ -8,7 +8,17 @@ export default async function PublicReviewSeller({ params }: { params: Promise<{
   if (!ctx) notFound();
   const { business, sellerId } = ctx;
   return (
-    <ReviewFlow businessId={business.id} sellerId={sellerId} name={business.name}
-      logoUrl={business.logoUrl} questions={business.questions} />
+    <main className="flex min-h-screen justify-center bg-canvas">
+      <div className="flex w-full max-w-[420px] flex-1 flex-col bg-card">
+        <ReviewFlow
+          businessId={business.id}
+          sellerId={sellerId}
+          name={business.name}
+          logoUrl={business.logoUrl}
+          questions={business.questions}
+          starThreshold={business.starThreshold}
+        />
+      </div>
+    </main>
   );
 }

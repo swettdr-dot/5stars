@@ -1,36 +1,46 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { createSeller } from "./actions";
+import { aggregateMetrics, googlePct } from "@/lib/metrics";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SellersTable, type SellerRow } from "./_components/SellersTable";
+import { NewSellerDialog } from "./_components/NewSellerDialog";
 
 export default async function SellersPage() {
   const user = await requireUser();
   if (user.role !== "BUSINESS_ADMIN" || !user.businessId) return <p>No autorizado.</p>;
-  const business = await prisma.business.findUnique({
-    where: { id: user.businessId },
-    include: { sellers: { orderBy: { name: "asc" }, include: { user: true } } },
+
+  // Acotado al negocio de la sesión: businessId ES la frontera de tenant del vendedor.
+  const sellers = await prisma.seller.findMany({
+    where: { businessId: user.businessId },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      user: { select: { email: true } },
+      reviews: { select: { starRating: true, outcome: true } },
+    },
   });
-  if (!business) return <p>Negocio no encontrado.</p>;
+
+  const rows: SellerRow[] = sellers.map((s) => {
+    const m = aggregateMetrics(s.reviews);
+    return {
+      id: s.id,
+      name: s.name,
+      email: s.user?.email ?? null,
+      reviews: m.total,
+      avg: m.average,
+      pct: googlePct(m),
+    };
+  });
+
   return (
-    <div className="space-y-8">
-      <h1 className="text-xl font-bold">Vendedores</h1>
-      <ul className="space-y-2">
-        {business.sellers.map((s) => (
-          <li key={s.id} className="rounded border p-3 text-sm">
-            <span className="font-medium">{s.name}</span> — <code>/r/{business.slug}/{s.slug}</code>
-            {s.user
-              ? <span className="ml-2 text-xs text-green-600">login: {s.user.email}</span>
-              : <span className="ml-2 text-xs text-gray-400">sin login</span>}
-            {" — "}
-            <a className="text-xs underline" href={`/business/sellers/qr/${s.id}`} target="_blank">descargar QR</a>
-          </li>
-        ))}
-      </ul>
-      <form action={createSeller} className="grid max-w-md gap-2">
-        <input name="name" placeholder="Nombre vendedor" className="rounded border p-2" required />
-        <input name="email" type="email" placeholder="Email login (opcional)" className="rounded border p-2" />
-        <input name="password" type="password" placeholder="Contraseña login (opcional, mín 6)" className="rounded border p-2" />
-        <button className="rounded bg-black p-2 text-white">Agregar</button>
-      </form>
+    <div>
+      <PageHeader
+        title="Vendedores"
+        subtitle="Cada uno tiene su propio link/QR para atribuir reseñas."
+        actions={<NewSellerDialog />}
+      />
+      <SellersTable rows={rows} />
     </div>
   );
 }

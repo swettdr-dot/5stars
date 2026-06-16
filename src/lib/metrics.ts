@@ -22,3 +22,31 @@ export function aggregateMetrics(reviews: ReviewLike[]): Metrics {
   const average = total === 0 ? 0 : Math.round((sum / total) * 100) / 100;
   return { total, average, redirected, distribution };
 }
+
+/** % de reseñas redirigidas a Google (0–100, redondeado). */
+export function googlePct(m: Metrics): number {
+  return m.total === 0 ? 0 : Math.round((m.redirected / m.total) * 100);
+}
+
+export type TimedReview = ReviewLike & { createdAt: Date };
+
+/** Filtra reseñas en [start, end). */
+export function inWindow<T extends { createdAt: Date }>(reviews: T[], start: Date, end?: Date): T[] {
+  return reviews.filter((r) => r.createdAt >= start && (!end || r.createdAt < end));
+}
+
+/**
+ * Promedio acumulado (hasta la fecha) en `weeks` cortes semanales que terminan en
+ * `now`. Devuelve un punto por semana (más antiguo → más reciente), sin huecos.
+ */
+export function weeklyAverageTrend(reviews: TimedReview[], now: Date, weeks = 8): number[] {
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const out: number[] = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const cutoff = new Date(now.getTime() - i * weekMs);
+    const upto = reviews.filter((r) => r.createdAt <= cutoff);
+    const avg = upto.length ? upto.reduce((a, r) => a + r.starRating, 0) / upto.length : 0;
+    out.push(Math.round(avg * 100) / 100);
+  }
+  return out;
+}

@@ -1,8 +1,8 @@
 "use server";
 import { z } from "zod";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildReviewCreateData } from "@/lib/review-build";
+import type { Outcome } from "@/lib/review-logic";
 
 const payloadSchema = z.object({
   businessId: z.string(),
@@ -15,12 +15,17 @@ const payloadSchema = z.object({
   contactEmail: z.string().optional(),
 });
 
-export async function submitReview(raw: unknown) {
+export type SubmitResult = { outcome: Outcome; googleReviewUrl: string; slug: string };
+
+/**
+ * Crea la reseña y devuelve el resultado (no redirige): el flujo público decide
+ * qué pantalla mostrar — éxito con CTA "Calificar en Google" (alto) o gracias (interno).
+ */
+export async function submitReview(raw: unknown): Promise<SubmitResult> {
   const p = payloadSchema.parse(raw);
   const business = await prisma.business.findUnique({ where: { id: p.businessId } });
   if (!business) throw new Error("BUSINESS_NOT_FOUND");
   const data = buildReviewCreateData({ ...p, starThreshold: business.starThreshold });
   await prisma.review.create({ data });
-  if (data.outcome === "REDIRECTED_GOOGLE") redirect(business.googleReviewUrl);
-  redirect(`/r/${business.slug}/gracias`);
+  return { outcome: data.outcome, googleReviewUrl: business.googleReviewUrl, slug: business.slug };
 }

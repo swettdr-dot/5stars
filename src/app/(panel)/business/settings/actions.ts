@@ -4,27 +4,79 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 
+/** Estado devuelto a la UI (useActionState) para mostrar feedback/validación. */
+export type SettingsState = {
+  ok: boolean;
+  /** Mensaje de éxito (toast). */
+  message?: string;
+  /** Error general (no atado a un campo). */
+  error?: string;
+  /** Errores por campo, para resaltar el input correspondiente. */
+  fieldErrors?: Partial<Record<"googleReviewUrl" | "logoUrl" | "starThreshold", string>>;
+};
+
 const schema = z.object({
-  googleReviewUrl: z.string().url(),
-  logoUrl: z.string().url().or(z.literal("")).optional(),
-  starThreshold: z.coerce.number().int().min(1).max(5),
+  googleReviewUrl: z
+    .string()
+    .trim()
+    .min(1, "Ingresá la URL de tu ficha de Google.")
+    .url("Ingresá una URL válida."),
+  // Acepta vacío, una URL http(s), o una imagen subida como data URL (base64).
+  logoUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (v) => !v || /^https?:\/\//i.test(v) || /^data:image\//i.test(v),
+      "Subí una imagen o pegá una URL válida.",
+    )
+    .refine((v) => !v || v.length <= 400_000, "La imagen es demasiado grande (máx ~250 KB)."),
+  starThreshold: z.coerce
+    .number()
+    .int()
+    .min(1, "El umbral debe estar entre 1 y 5.")
+    .max(5, "El umbral debe estar entre 1 y 5."),
 });
 
-export async function updateSettings(formData: FormData) {
+export async function updateSettings(
+  _prev: SettingsState,
+  formData: FormData,
+): Promise<SettingsState> {
   const user = await requireUser();
-  if (user.role !== "BUSINESS_ADMIN" || !user.businessId) throw new Error("FORBIDDEN");
-  const data = schema.parse({
+  // Acotado al negocio de la sesión (tenancy): solo el BUSINESS_ADMIN de su negocio.
+  if (user.role !== "BUSINESS_ADMIN" || !user.businessId) {
+    return { ok: false, error: "No tenés permisos para editar este negocio." };
+  }
+
+  const parsed = schema.safeParse({
     googleReviewUrl: formData.get("googleReviewUrl"),
     logoUrl: formData.get("logoUrl"),
     starThreshold: formData.get("starThreshold"),
   });
+
+  if (!parsed.success) {
+    const flat = parsed.error.flatten().fieldErrors;
+    return {
+      ok: false,
+      error: "Revisá los campos marcados.",
+      fieldErrors: {
+        googleReviewUrl: flat.googleReviewUrl?.[0],
+        logoUrl: flat.logoUrl?.[0],
+        starThreshold: flat.starThreshold?.[0],
+      },
+    };
+  }
+
+  const data = parsed.data;
   await prisma.business.update({
     where: { id: user.businessId },
     data: {
       googleReviewUrl: data.googleReviewUrl,
-      logoUrl: data.logoUrl || null,
+      logoUrl: data.logoUrl ? data.logoUrl : null,
       starThreshold: data.starThreshold,
     },
   });
+
   revalidatePath("/business/settings");
+  return { ok: true, message: "Cambios guardados." };
 }

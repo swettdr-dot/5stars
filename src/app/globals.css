@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   Design tokens — 5stars
+   Fuente: design_handoff_5stars/README.md (hi-fi, valores finales).
+   Los valores crudos viven como variables CSS en :root (faithful al prototipo
+   y overrideables en runtime); @theme inline los expone como utilidades de
+   Tailwind 4 (bg-*, text-*, border-*, rounded-*, gap-*, …).
+   ============================================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Acento — configurable en runtime vía prop `accent`: sobrescribir --ac y
+     los derivados se recalculan solos vía color-mix. */
+  --ac: #5b5bf0;
+  --ac-d: color-mix(in srgb, var(--ac) 84%, #000); /* hover del primario */
+  --ac-bg: color-mix(in srgb, var(--ac) 10%, #fff); /* chips/avatares/nav activo */
+  --ac-weak: color-mix(in srgb, var(--ac) 6%, #fff); /* hover sutil */
+
+  /* Tinta / texto */
+  --ink: #1a1a1f; /* texto principal */
+  --ink-2: #6a6a75; /* texto secundario */
+  --ink-3: #9a9aa4; /* terciario / placeholders */
+
+  /* Superficies y líneas */
+  --line: #eaeaef; /* bordes y divisores */
+  --bg: #f6f6f8; /* fondo de la app */
+  --card: #ffffff; /* fondo de tarjetas */
+
+  /* Semánticos */
+  --amber: #f5a524; /* estrellas / calificaciones */
+  --green: #16a34a; /* a Google / deltas positivos */
+  --green-bg: #e9f7ee;
+  --red: #e5484d; /* internas / deltas negativos */
+  --red-bg: #fcecec;
+
+  /* Colores de barras de distribución por estrella */
+  --star-5: var(--amber);
+  --star-4: var(--amber);
+  --star-3: #f0b86e;
+  --star-2: #e89a8e;
+  --star-1: #e89a8e;
+
+  /* Paletas de avatar (bg / fg) — rotan por índice */
+  --avatar-1-bg: #eef0ff;
+  --avatar-1-fg: #4f46e5;
+  --avatar-2-bg: #e9f7ee;
+  --avatar-2-fg: #16a34a;
+  --avatar-3-bg: #fdf0e6;
+  --avatar-3-fg: #d97706;
+  --avatar-4-bg: #fce9f0;
+  --avatar-4-fg: #db2777;
+  --avatar-5-bg: #e6f4f8;
+  --avatar-5-fg: #0891b2;
+  --avatar-6-bg: #f0ecfa;
+  --avatar-6-fg: #7c3aed;
+
+  /* Dimensiones de layout (usadas directo vía var() en el shell) */
+  --sidebar-w: 248px;
+  --topbar-h: 60px;
+  --control-h: 42px;
+
+  /* Escala global del panel (≈ "zoom" del navegador). Ajustar acá afecta todo
+     el panel de forma uniforme. El flujo público (mobile-first) no se escala. */
+  --panel-zoom: 0.9;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* ---- Tipografía ---- */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Escala de texto observada (hi-fi). Nombres semánticos para no pisar la
+     escala default de Tailwind. */
+  --text-label: 11px; /* uppercase labels (usar con tracking-label) */
+  --text-meta: 12.5px; /* texto secundario */
+  --text-body: 13.5px; /* texto base */
+  --text-card-title: 14px; /* títulos de card */
+  --text-topbar: 16px; /* título del topbar */
+  --text-title: 22px; /* título de página */
+  --text-kpi: 27px; /* valor de KPI */
+
+  --tracking-tight: -0.02em; /* títulos */
+  --tracking-label: 0.04em; /* uppercase labels */
+
+  /* ---- Colores → utilidades bg-/text-/border- ---- */
+  --color-accent: var(--ac);
+  --color-accent-dark: var(--ac-d);
+  --color-accent-bg: var(--ac-bg);
+  --color-accent-weak: var(--ac-weak);
+
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+
+  --color-line: var(--line);
+  --color-canvas: var(--bg);
+  --color-card: var(--card);
+
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-green-bg: var(--green-bg);
+  --color-red: var(--red);
+  --color-red-bg: var(--red-bg);
+
+  /* ---- Radios ---- */
+  --radius-control: 10px; /* inputs / botones (9–10px) */
+  --radius-card: 13px; /* tarjetas */
+  --radius-pill: 20px; /* chips / badges */
+
+  /* ---- Espaciado nombrado ---- */
+  --spacing-grid: 14px; /* gap de grids */
+
+  /* ---- Sombras ---- */
+  --shadow-card: 0 8px 30px -12px rgba(20, 20, 40, 0.12); /* card de login */
+
+  /* ---- Animaciones ---- */
+  --animate-pop: pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* checkmarks de éxito */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes pop {
+  0% {
+    transform: scale(0.7);
+  }
+  55% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-feature-settings: "cv01", "ss01"; /* stylistic set de Geist (del prototipo) */
 }

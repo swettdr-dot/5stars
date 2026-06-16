@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  :root{
+    --ac:#5B5BF0;
+    --ac-d:color-mix(in srgb, var(--ac) 84%, #000);
+    --ac-bg:color-mix(in srgb, var(--ac) 10%, #fff);
+    --ac-weak:color-mix(in srgb, var(--ac) 6%, #fff);
+    --ink:#1A1A1F; --ink-2:#6A6A75; --ink-3:#9A9AA4;
+    --line:#EAEAEF; --bg:#F6F6F8; --card:#FFFFFF;
+    --amber:#F5A524; --green:#16A34A; --green-bg:#E9F7EE; --red:#E5484D; --red-bg:#FCECEC;
+  }
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#dcdce3;border-radius:8px;border:3px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:#c8c8d2;border:3px solid transparent;background-clip:content-box}
+  @keyframes pop{0%{transform:scale(.7)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+
+<div style="font-family:'Geist',-apple-system,system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;font-feature-settings:'cv01','ss01'">
+
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(120% 80% at 50% -10%, var(--ac-bg), var(--bg) 60%)">
+    <div style="width:100%;max-width:380px">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px">
+        <div style="width:34px;height:34px;border-radius:9px;background:var(--ac);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px">★</div>
+        <span style="font-size:20px;font-weight:600;letter-spacing:-.02em">5stars</span>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 8px 30px -12px rgba(20,20,40,.12)">
+        <h1 style="font-size:21px;font-weight:600;letter-spacing:-.02em;margin:0 0 4px">Inicia sesión</h1>
+        <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 22px">Bienvenido de nuevo a tu panel.</p>
+        <label style="display:block;font-size:12.5px;font-weight:500;color:var(--ink-2);margin-bottom:6px">Email</label>
+        <input value="hola@cafearoma.com" style="width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 12px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;margin-bottom:14px" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-bg)">
+        <label style="display:block;font-size:12.5px;font-weight:500;color:var(--ink-2);margin-bottom:6px">Contraseña</label>
+        <input type="password" value="123456789" style="width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 12px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff;outline:none;margin-bottom:18px" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-bg)">
+        <button onClick="{{ login }}" style="width:100%;height:42px;border:none;border-radius:9px;background:var(--ac);color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s" style-hover="background:var(--ac-d)">Ingresar</button>
+        <div style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-3)">¿Olvidaste tu contraseña?</div>
+      </div>
+      <p style="text-align:center;font-size:12px;color:var(--ink-3);margin-top:18px">Demo · al ingresar puedes cambiar de rol en la esquina superior izquierda</p>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;min-height:100vh">
+
+    <sc-if value="{{ isSidebar }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:248px;flex-shrink:0;background:#FCFCFD;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+      <div style="padding:18px 18px 14px;display:flex;align-items:center;gap:10px">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">★</div>
+        <span style="font-size:16.5px;font-weight:600;letter-spacing:-.02em">5stars</span>
+      </div>
+
+      <div style="padding:6px 12px 10px">
+        <button onClick="{{ toggleRoleMenu }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-family:inherit;text-align:left" style-hover="border-color:#dcdce3">
+          <div style="width:30px;height:30px;border-radius:8px;background:var(--ac-bg);color:var(--ac-d);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0">{{ orgInitials }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ orgName }}</div>
+            <div style="font-size:11px;color:var(--ink-3)">{{ roleLabel }}</div>
+          </div>
+          <span style="color:var(--ink-3);font-size:11px">▼</span>
+        </button>
+        <sc-if value="{{ roleMenuOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:6px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 10px 24px -14px rgba(20,20,40,.2);overflow:hidden">
+          <div style="font-size:10.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;padding:9px 12px 4px">Ver panel como</div>
+          <sc-for list="{{ roleTabs }}" as="r" hint-placeholder-count="4">
+            <button onClick="{{ r.onClick }}" style="width:100%;display:flex;align-items:center;gap:9px;padding:8px 12px;border:none;background:{{ r.bg }};cursor:pointer;font-family:inherit;text-align:left" style-hover="background:var(--ac-weak)">
+              <span style="width:7px;height:7px;border-radius:50%;background:{{ r.dot }}"></span>
+              <span style="flex:1;font-size:12.5px;font-weight:500;color:var(--ink)">{{ r.label }}</span>
+              <span style="font-size:11px;color:var(--ac);font-weight:600">{{ r.check }}</span>
+            </button>
+          </sc-for>
+        </div>
+        </sc-if>
+      </div>
+
+      <nav style="padding:6px 12px;flex:1;overflow:auto">
+        <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+          <button onClick="{{ n.onClick }}" style="width:100%;display:flex;align-items:center;gap:11px;padding:8.5px 10px;margin-bottom:2px;border:none;border-radius:9px;background:{{ n.bg }};color:{{ n.color }};cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:{{ n.weight }};text-align:left;transition:background .12s" style-hover="background:var(--ac-weak)">
+            <span style="display:flex;color:{{ n.iconColor }}">{{ n.icon }}</span>
+            <span style="flex:1">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;background:var(--ac);color:#fff;border-radius:20px;padding:1px 7px">{{ n.badge }}</span></sc-if>
+          </button>
+        </sc-for>
+      </nav>
+
+      <div style="padding:12px;border-top:1px solid var(--line)">
+        <button onClick="{{ openPublic }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border:1px dashed #c9c9d4;border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2)" style-hover="border-color:var(--ac);color:var(--ac)">Ver flujo público ↗</button>
+        <button onClick="{{ logout }}" style="width:100%;display:flex;align-items:center;gap:11px;padding:8.5px 10px;margin-top:6px;border:none;border-radius:9px;background:transparent;color:var(--ink-2);cursor:pointer;font-family:inherit;font-size:13px;text-align:left" style-hover="background:var(--ac-weak)">Cerrar sesión</button>
+      </div>
+    </aside>
+    </sc-if>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+      <header style="height:60px;flex-shrink:0;border-bottom:1px solid var(--line);background:rgba(252,252,253,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;padding:0 24px">
+        <sc-if value="{{ isTopbar }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:10px;margin-right:6px">
+          <div style="width:28px;height:28px;border-radius:7px;background:var(--ac);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px">★</div>
+        </div>
+        <nav style="display:flex;gap:2px">
+          <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+            <button onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:7px;padding:7px 12px;border:none;border-radius:8px;background:{{ n.bg }};color:{{ n.color }};cursor:pointer;font-family:inherit;font-size:13px;font-weight:{{ n.weight }};white-space:nowrap" style-hover="background:var(--ac-weak)"><span style="display:flex;color:{{ n.iconColor }}">{{ n.icon }}</span>{{ n.label }}</button>
+          </sc-for>
+        </nav>
+        </sc-if>
+        <div style="min-width:0">
+          <sc-if value="{{ isSidebar }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ pageTitle }}</h1>
+          </sc-if>
+        </div>
+        <div style="flex:1"></div>
+        <div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink-3);font-size:13px;min-width:200px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+          <span>Buscar…</span>
+        </div>
+        <sc-if value="{{ isTopbar }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ openPublic }}" style="height:36px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2)" style-hover="border-color:var(--ac);color:var(--ac)">Flujo público ↗</button>
+        </sc-if>
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--ac-bg);color:var(--ac-d);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px">JM</div>
+      </header>
+
+      <main style="flex:1;overflow:auto;padding:26px 24px 60px">
+       <div style="max-width:1320px;margin:0" key="{{ contentKey }}">
+
+        <!-- ============ OVERVIEW ============ -->
+        <sc-if value="{{ showOverview }}" hint-placeholder-val="{{ true }}">
+        <div style="">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+            <div>
+              <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">{{ ovTitle }}</h2>
+              <p style="font-size:13.5px;color:var(--ink-2);margin:0">{{ ovSubtitle }}</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <sc-for list="{{ rangeTabs }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.onClick }}" style="height:34px;padding:0 13px;border:1px solid {{ t.border }};border-radius:8px;background:{{ t.bg }};color:{{ t.color }};cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:{{ t.weight }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 16px 14px">
+              <div style="display:flex;align-items:center;gap:7px;color:var(--ink-2);font-size:12.5px;font-weight:500;margin-bottom:12px">
+                <span style="display:flex;color:{{ k.iconColor }}">{{ k.icon }}</span>{{ k.label }}
+              </div>
+              <div style="display:flex;align-items:baseline;gap:7px">
+                <span style="font-size:27px;font-weight:600;letter-spacing:-.02em">{{ k.value }}</span>
+                <span style="font-size:13px;color:var(--ink-3)">{{ k.unit }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:9px;font-size:12px;font-weight:600;color:{{ k.deltaColor }}">
+                <span>{{ k.deltaArrow }}</span><span>{{ k.delta }}</span>
+                <span style="color:var(--ink-3);font-weight:400">{{ k.deltaNote }}</span>
+              </div>
+            </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-bottom:14px">
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+                <div>
+                  <div style="font-size:14px;font-weight:600">{{ distTitle }}</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px">{{ distSub }}</div>
+                </div>
+                <div style="display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px">
+                  <sc-for list="{{ chartTabs }}" as="c" hint-placeholder-count="2">
+                  <button onClick="{{ c.onClick }}" style="padding:4px 10px;border:none;border-radius:6px;background:{{ c.bg }};color:{{ c.color }};font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ chartIsBars }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ dist }}" as="d" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:34px;display:flex;align-items:center;gap:2px;font-size:12.5px;font-weight:600;color:var(--ink-2);justify-content:flex-end">{{ d.star }}<span style="color:var(--amber)">★</span></div>
+                  <div style="flex:1;height:10px;border-radius:6px;background:#F0F0F4;overflow:hidden">
+                    <div style="height:100%;border-radius:6px;background:{{ d.fill }};width:{{ d.pct }}%;transition:width .6s cubic-bezier(.2,.8,.2,1)"></div>
+                  </div>
+                  <div style="width:74px;text-align:right;font-size:12.5px;color:var(--ink-2)"><b style="color:var(--ink)">{{ d.count }}</b> · {{ d.pct }}%</div>
+                </div>
+                </sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ chartIsCols }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-end;gap:14px;height:172px;padding-top:8px">
+                <sc-for list="{{ dist }}" as="d" hint-placeholder-count="5">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end">
+                  <div style="font-size:12px;font-weight:600;color:var(--ink-2)">{{ d.count }}</div>
+                  <div style="width:100%;max-width:46px;border-radius:8px 8px 3px 3px;background:{{ d.fill }};height:{{ d.colH }}%;min-height:6px;transition:height .6s cubic-bezier(.2,.8,.2,1)"></div>
+                  <div style="font-size:12.5px;font-weight:600;color:var(--ink-2)">{{ d.star }}<span style="color:var(--amber)">★</span></div>
+                </div>
+                </sc-for>
+              </div>
+              </sc-if>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;display:flex;flex-direction:column">
+              <div style="font-size:14px;font-weight:600;margin-bottom:2px">Destino de las reseñas</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">Redirigidas vs. capturadas</div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;margin:6px 0">{{ donutChart }}</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span style="width:9px;height:9px;border-radius:3px;background:var(--ac)"></span>
+                  <span style="flex:1;color:var(--ink-2)">A Google (públicas)</span><b>{{ redirCount }}</b>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span style="width:9px;height:9px;border-radius:3px;background:#E3E3EA"></span>
+                  <span style="flex:1;color:var(--ink-2)">Internas (privadas)</span><b>{{ internalCount }}</b>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:14px">
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden">
+              <div style="padding:16px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)">
+                <div style="font-size:14px;font-weight:600">{{ listTitle }}</div>
+                <button onClick="{{ goListFromOverview }}" style="border:none;background:transparent;color:var(--ac);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Ver todo →</button>
+              </div>
+              <sc-for list="{{ overviewRows }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 18px;border-bottom:1px solid var(--line)">
+                <div style="width:34px;height:34px;border-radius:50%;background:{{ r.avBg }};color:{{ r.avColor }};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12.5px;flex-shrink:0">{{ r.initials }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</div>
+                  <div style="font-size:11.5px;color:var(--ink-3);margin-top:1px">{{ r.meta }}</div>
+                </div>
+                <div style="font-size:12.5px;font-weight:600;white-space:nowrap;color:var(--amber)">{{ r.stars }}</div>
+                <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:{{ r.tagBg }};color:{{ r.tagColor }};white-space:nowrap">{{ r.tag }}</span>
+              </div>
+              </sc-for>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:2px">{{ trendTitle }}</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-bottom:6px">{{ trendSub }}</div>
+              <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 12px">
+                <span style="font-size:26px;font-weight:600;letter-spacing:-.02em">{{ trendNow }}</span>
+                <span style="font-size:12.5px;font-weight:600;color:var(--green)">{{ trendDelta }}</span>
+              </div>
+              {{ trendChart }}
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-top:8px">
+                <span>{{ trendStart }}</span><span>Hoy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ REVIEWS ============ -->
+        <sc-if value="{{ showReviews }}" hint-placeholder-val="{{ false }}">
+        <div style="">
+          <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">Reseñas</h2>
+          <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 18px">Todas las calificaciones recibidas, públicas e internas.</p>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+            <sc-for list="{{ reviewFilters }}" as="f" hint-placeholder-count="4">
+            <button onClick="{{ f.onClick }}" style="height:34px;padding:0 13px;border:1px solid {{ f.border }};border-radius:20px;background:{{ f.bg }};color:{{ f.color }};cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:{{ f.weight }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden">
+            <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex;gap:14px;padding:15px 18px;border-bottom:1px solid var(--line)">
+              <div style="width:38px;height:38px;border-radius:50%;background:{{ r.avBg }};color:{{ r.avColor }};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0">{{ r.initials }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:3px;flex-wrap:wrap">
+                  <span style="color:var(--amber);font-size:13px;letter-spacing:1px">{{ r.starsGlyph }}</span>
+                  <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:{{ r.tagBg }};color:{{ r.tagColor }}">{{ r.tag }}</span>
+                  <span style="font-size:11.5px;color:var(--ink-3)">{{ r.time }}</span>
+                </div>
+                <div style="font-size:13.5px;color:var(--ink);line-height:1.5">{{ r.text }}</div>
+                <div style="font-size:11.5px;color:var(--ink-3);margin-top:5px">Vendedor: {{ r.seller }}<sc-if value="{{ r.contact }}" hint-placeholder-val="{{ false }}"> · Contacto: {{ r.contact }}</sc-if></div>
+              </div>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ PREGUNTAS ============ -->
+        <sc-if value="{{ showQuestions }}" hint-placeholder-val="{{ false }}">
+        <div style="">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+            <div>
+              <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">Constructor de preguntas</h2>
+              <p style="font-size:13.5px;color:var(--ink-2);margin:0">Lo que ve el cliente antes de calificar. Se muestran en orden.</p>
+            </div>
+            <button onClick="{{ openPublic }}" style="height:38px;padding:0 15px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-2)" style-hover="border-color:var(--ac);color:var(--ac)">Previsualizar ↗</button>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 348px;gap:26px;align-items:start">
+           <div>
+            <div style="display:grid;grid-template-columns:1fr;gap:11px">
+            <sc-for list="{{ questionRows }}" as="q" hint-placeholder-count="3">
+            <div onClick="{{ q.onClick }}" style="background:{{ q.cardBg }};border:1.5px solid {{ q.cardBorder }};border-radius:12px;padding:15px 16px;display:flex;gap:13px;align-items:flex-start;cursor:pointer;transition:border-color .15s,background .15s" style-hover="border-color:var(--ac)">
+              <div style="display:flex;flex-direction:column;gap:3px;color:var(--ink-3);padding-top:2px;cursor:grab">
+                <span style="font-size:9px;line-height:.7">⋮⋮</span>
+              </div>
+              <div style="width:26px;height:26px;border-radius:7px;background:var(--ac-bg);color:var(--ac-d);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;flex-shrink:0">{{ q.n }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:600;margin-bottom:3px">{{ q.title }}</div>
+                <div style="font-size:12px;color:var(--ink-3)">{{ q.type }}</div>
+                <sc-if value="{{ q.hasOptions }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+                  <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="3">
+                  <span style="font-size:12px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:4px 9px">{{ o }}</span>
+                  </sc-for>
+                </div>
+                </sc-if>
+              </div>
+              <label style="position:relative;display:inline-block;width:34px;height:20px;flex-shrink:0;cursor:pointer">
+                <span style="position:absolute;inset:0;background:{{ q.toggleBg }};border-radius:20px;transition:.2s"></span>
+                <span style="position:absolute;top:2px;left:{{ q.knobX }};width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span>
+              </label>
+            </div>
+            </sc-for>
+            <button style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border:1px dashed #c9c9d4;border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-2)" style-hover="border-color:var(--ac);color:var(--ac)">+ Agregar pregunta</button>
+            </div>
+            <div onClick="{{ goPreviewRating }}" style="margin-top:14px;background:var(--ac-weak);border:1.5px solid color-mix(in srgb, var(--ac) 18%, #fff);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--ink-2);line-height:1.55;cursor:pointer" style-hover="border-color:var(--ac)">
+              <b style="color:var(--ink)">Paso final fijo:</b> después de las preguntas siempre aparece el selector de 1 a 5 estrellas. Si la nota es ≥ tu umbral ({{ threshold }}★) se redirige a Google; si es menor, se captura en privado.
+            </div>
+           </div>
+
+           <div style="position:sticky;top:84px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">Vista previa en vivo</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:var(--green)"></span>Como lo ve el cliente</span>
+            </div>
+            <div style="width:330px;height:560px;background:#fff;border-radius:36px;border:9px solid #14141f;box-shadow:0 22px 50px -20px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column">
+              <div style="height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><div style="width:92px;height:18px;background:#14141f;border-radius:0 0 13px 13px;margin-top:-9px"></div></div>
+              <div style="padding:12px 18px 6px;flex-shrink:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                  <div style="width:26px;height:26px;border-radius:7px;background:repeating-linear-gradient(135deg,#EDEDF2 0 6px,#fff 6px 12px);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:6px;color:var(--ink-3);font-family:'Geist Mono',monospace">logo</div>
+                  <span style="font-size:12.5px;font-weight:600">{{ businessName }}</span>
+                </div>
+                <div style="height:4px;border-radius:4px;background:#EFEFF3;overflow:hidden"><div style="height:100%;background:var(--ac);border-radius:4px;width:{{ pvProgress }}%;transition:width .4s cubic-bezier(.2,.8,.2,1)"></div></div>
+              </div>
+              <div style="flex:1;overflow:hidden;padding:10px 18px 14px;display:flex;flex-direction:column">
+                <sc-if value="{{ pvIsChoice }}" hint-placeholder-val="{{ true }}">
+                <div style="flex:1;display:flex;flex-direction:column">
+                  <div style="font-size:10px;font-weight:600;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 7px">{{ pvLabel }}</div>
+                  <h3 style="font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin:0 0 14px">{{ pvText }}</h3>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <sc-for list="{{ pvOptions }}" as="o" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font-size:12.5px;font-weight:500;color:var(--ink)"><span style="font-size:15px">{{ o.emoji }}</span>{{ o.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                </sc-if>
+                <sc-if value="{{ pvIsText }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1;display:flex;flex-direction:column">
+                  <div style="font-size:10px;font-weight:600;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 7px">{{ pvLabel }}</div>
+                  <h3 style="font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin:0 0 14px">{{ pvText }}</h3>
+                  <div style="flex:1;border:1.5px solid var(--line);border-radius:11px;padding:11px;font-size:12.5px;color:var(--ink-3)">Escribe aquí (opcional)…</div>
+                  <div style="margin-top:12px;height:42px;border-radius:11px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">Continuar</div>
+                </div>
+                </sc-if>
+                <sc-if value="{{ pvIsRating }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center">
+                  <h3 style="font-size:17px;font-weight:600;letter-spacing:-.01em;margin:0 0 4px">{{ pvText }}</h3>
+                  <p style="font-size:12px;color:var(--ink-2);margin:0 0 18px">Toca las estrellas</p>
+                  <div style="display:flex;gap:5px;margin-bottom:18px">
+                    <sc-for list="{{ pvStars }}" as="st" hint-placeholder-count="5">
+                    <svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 2.6l2.69 5.45 6.01.87-4.35 4.24 1.03 5.99L12 16.3l-5.38 2.83 1.03-5.99L3.3 8.92l6.01-.87z" fill="#EDEDF2" stroke="#DDDDE3" stroke-width="1" stroke-linejoin="round"></path></svg>
+                    </sc-for>
+                  </div>
+                  <div style="width:100%;height:42px;border-radius:11px;background:#EDEDF2;color:var(--ink-3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">Enviar calificación</div>
+                </div>
+                </sc-if>
+              </div>
+              <div style="flex-shrink:0;border-top:1px solid var(--line);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;background:#fff">
+                <button onClick="{{ pvPrev }}" style="width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;color:{{ pvPrevColor }};font-size:13px;display:flex;align-items:center;justify-content:center;font-family:inherit">◀</button>
+                <div style="display:flex;align-items:center;gap:5px">
+                  <sc-for list="{{ pvDots }}" as="d" hint-placeholder-count="4">
+                  <button onClick="{{ d.onClick }}" style="width:{{ d.w }};height:6px;border:none;border-radius:6px;background:{{ d.bg }};cursor:pointer;transition:all .2s;padding:0"></button>
+                  </sc-for>
+                </div>
+                <button onClick="{{ pvNext }}" style="width:30px;height:30px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;color:{{ pvNextColor }};font-size:13px;display:flex;align-items:center;justify-content:center;font-family:inherit">▶</button>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:11.5px;color:var(--ink-3);margin-top:10px">{{ pvStepLabel }} · sincronizado con tu selección</div>
+           </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ VENDEDORES ============ -->
+        <sc-if value="{{ showSellers }}" hint-placeholder-val="{{ false }}">
+        <div style="">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+            <div>
+              <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">Vendedores</h2>
+              <p style="font-size:13.5px;color:var(--ink-2);margin:0">Cada uno tiene su propio link/QR para atribuir reseñas.</p>
+            </div>
+            <button style="height:38px;padding:0 15px;border:none;border-radius:9px;background:var(--ac);color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600" style-hover="background:var(--ac-d)">+ Nuevo vendedor</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line);font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">
+              <span>Vendedor</span><span>Reseñas</span><span>Promedio</span><span>% a Google</span>
+            </div>
+            <sc-for list="{{ sellerRows }}" as="s" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <div style="width:32px;height:32px;border-radius:50%;background:{{ s.avBg }};color:{{ s.avColor }};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0">{{ s.initials }}</div>
+                <div style="min-width:0"><div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</div><div style="font-size:11.5px;color:var(--ink-3)">{{ s.email }}</div></div>
+              </div>
+              <span style="font-size:13.5px;font-weight:600">{{ s.reviews }}</span>
+              <span style="font-size:13.5px;font-weight:600;color:var(--amber)">{{ s.avg }} ★</span>
+              <div style="display:flex;align-items:center;gap:9px">
+                <div style="flex:1;max-width:80px;height:7px;border-radius:5px;background:#F0F0F4;overflow:hidden"><div style="height:100%;background:var(--ac);width:{{ s.pct }}%"></div></div>
+                <span style="font-size:12.5px;color:var(--ink-2);font-weight:600">{{ s.pct }}%</span>
+              </div>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ QR / LINK ============ -->
+        <sc-if value="{{ showQR }}" hint-placeholder-val="{{ false }}">
+        <div style="">
+          <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">{{ qrTitle }}</h2>
+          <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 18px">Comparte este enlace o QR con tus clientes para recolectar reseñas.</p>
+          <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;max-width:760px">
+            <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:16px">
+              <div style="width:200px;height:200px;border-radius:14px;background:#fff;border:1px solid var(--line);padding:16px;position:relative;display:flex;align-items:center;justify-content:center">
+                <div style="position:absolute;inset:16px;background:repeating-conic-gradient(var(--ink) 0% 25%, #fff 0% 50%);background-size:14px 14px;border-radius:6px;opacity:.92"></div>
+                <div style="position:absolute;top:16px;left:16px;width:46px;height:46px;border:7px solid var(--ink);border-radius:8px;background:#fff"></div>
+                <div style="position:absolute;top:16px;right:16px;width:46px;height:46px;border:7px solid var(--ink);border-radius:8px;background:#fff"></div>
+                <div style="position:absolute;bottom:16px;left:16px;width:46px;height:46px;border:7px solid var(--ink);border-radius:8px;background:#fff"></div>
+                <div style="position:relative;width:40px;height:40px;border-radius:9px;background:var(--ac);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:700">★</div>
+              </div>
+              <button style="width:100%;height:38px;border:none;border-radius:9px;background:var(--ac);color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600" style-hover="background:var(--ac-d)">Descargar QR</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px">
+                <div style="font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:8px">Tu enlace público</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1;height:40px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ink-2);overflow:hidden;white-space:nowrap">{{ publicLink }}</div>
+                  <button style="height:40px;padding:0 14px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink)" style-hover="border-color:var(--ac);color:var(--ac)">Copiar</button>
+                </div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;display:flex;gap:14px;align-items:center">
+                <div style="width:42px;height:42px;border-radius:11px;background:var(--ac-bg);color:var(--ac-d);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">★</div>
+                <div style="flex:1"><div style="font-size:14px;font-weight:600">{{ qrScans }} escaneos este mes</div><div style="font-size:12.5px;color:var(--ink-3)">Generaron {{ qrReviews }} reseñas nuevas</div></div>
+              </div>
+              <button onClick="{{ openPublic }}" style="height:44px;border:1px dashed #c9c9d4;border-radius:11px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-2)" style-hover="border-color:var(--ac);color:var(--ac)">Ver cómo lo experimenta el cliente ↗</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ AGENCIES / BUSINESSES TABLE ============ -->
+        <sc-if value="{{ showEntities }}" hint-placeholder-val="{{ false }}">
+        <div style="">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+            <div>
+              <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">{{ entTitle }}</h2>
+              <p style="font-size:13.5px;color:var(--ink-2);margin:0">{{ entSub }}</p>
+            </div>
+            <button style="height:38px;padding:0 15px;border:none;border-radius:9px;background:var(--ac);color:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600" style-hover="background:var(--ac-d)">{{ entCta }}</button>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 0.8fr;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line);font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em">
+              <span>{{ entCol1 }}</span><span>{{ entCol2 }}</span><span>Reseñas</span><span>Promedio</span><span>Estado</span>
+            </div>
+            <sc-for list="{{ entityRows }}" as="e" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 0.8fr;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <div style="width:34px;height:34px;border-radius:9px;background:{{ e.avBg }};color:{{ e.avColor }};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0">{{ e.initials }}</div>
+                <div style="min-width:0"><div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</div><div style="font-size:11.5px;color:var(--ink-3)">{{ e.sub }}</div></div>
+              </div>
+              <span style="font-size:13.5px;font-weight:600">{{ e.col2 }}</span>
+              <span style="font-size:13.5px;font-weight:600">{{ e.reviews }}</span>
+              <span style="font-size:13.5px;font-weight:600;color:var(--amber)">{{ e.avg }} ★</span>
+              <span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:{{ e.stBg }};color:{{ e.stColor }};justify-self:start;white-space:nowrap">{{ e.status }}</span>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ============ SETTINGS ============ -->
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+        <div style=";max-width:680px">
+          <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 3px">Ajustes del negocio</h2>
+          <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 20px">Configura el comportamiento del flujo de reseñas y la marca.</p>
+
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;margin-bottom:14px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px">Umbral de estrellas</div>
+            <p style="font-size:12.5px;color:var(--ink-2);margin:0 0 14px">Calificaciones de <b>{{ threshold }}★ o más</b> se redirigen a Google. Menores se capturan en privado.</p>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ thresholdBtns }}" as="t" hint-placeholder-count="5">
+              <button onClick="{{ t.onClick }}" style="flex:1;height:48px;border:1px solid {{ t.border }};border-radius:10px;background:{{ t.bg }};color:{{ t.color }};cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:3px">{{ t.label }}<span style="font-size:12px">★</span></button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;margin-bottom:14px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">URL de tu ficha de Google</div>
+            <div style="display:flex;align-items:center;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden">
+              <span style="padding:0 12px;color:var(--ink-3);font-size:13px;border-right:1px solid var(--line);height:100%;display:flex;align-items:center;background:var(--bg)">https://</span>
+              <input value="g.page/cafearoma/review" style="flex:1;border:none;outline:none;height:100%;padding:0 12px;font-size:13.5px;font-family:'Geist Mono',monospace;color:var(--ink);background:transparent">
+            </div>
+            <p style="font-size:12px;color:var(--ink-3);margin:9px 0 0">Aquí se envía al cliente cuando deja una calificación alta.</p>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;margin-bottom:14px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px">Logo del negocio</div>
+            <p style="font-size:12.5px;color:var(--ink-2);margin:0 0 14px">Se muestra en el flujo público. El resto del diseño se mantiene neutral.</p>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="width:64px;height:64px;border-radius:14px;border:1px solid var(--line);background:repeating-linear-gradient(135deg,#F2F2F6 0 8px,#fff 8px 16px);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:9px;font-family:'Geist Mono',monospace;text-align:center;flex-shrink:0">logo<br>64×64</div>
+              <button style="height:38px;padding:0 15px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink)" style-hover="border-color:var(--ac);color:var(--ac)">Subir logo</button>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button style="height:40px;padding:0 16px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-2)">Cancelar</button>
+            <button style="height:40px;padding:0 18px;border:none;border-radius:9px;background:var(--ac);color:#fff;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600" style-hover="background:var(--ac-d)">Guardar cambios</button>
+          </div>
+        </div>
+        </sc-if>
+
+       </div>
+      </main>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PUBLIC FLOW (phone overlay) ============ -->
+  <sc-if value="{{ publicOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closePublic }}" style="position:fixed;inset:0;z-index:60;background:rgba(20,20,35,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div onClick="{{ stop }}" style="width:362px;height:712px;background:#fff;border-radius:42px;border:10px solid #14141f;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);overflow:hidden;position:relative;display:flex;flex-direction:column">
+        <div style="height:30px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="width:110px;height:22px;background:#14141f;border-radius:0 0 16px 16px;margin-top:-10px"></div>
+        </div>
+
+        <div style="padding:16px 22px 8px;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px">
+            <div style="width:30px;height:30px;border-radius:8px;background:repeating-linear-gradient(135deg,#EDEDF2 0 6px,#fff 6px 12px);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--ink-3);font-family:'Geist Mono',monospace">logo</div>
+            <span style="font-size:14px;font-weight:600">{{ businessName }}</span>
+          </div>
+          <div style="height:5px;border-radius:5px;background:#EFEFF3;overflow:hidden">
+            <div style="height:100%;background:var(--ac);border-radius:5px;width:{{ pProgress }}%;transition:width .4s cubic-bezier(.2,.8,.2,1)"></div>
+          </div>
+        </div>
+
+        <div style="flex:1;overflow:auto;padding:14px 22px 22px;display:flex;flex-direction:column">
+
+          <sc-if value="{{ fQuestion }}" hint-placeholder-val="{{ true }}">
+          <div key="{{ pScreen }}" style="display:flex;flex-direction:column;flex:1;">
+            <div style="font-size:11.5px;font-weight:600;color:var(--ac);text-transform:uppercase;letter-spacing:.05em;margin:8px 0 8px">{{ qStepLabel }}</div>
+            <h2 style="font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin:0 0 22px">{{ qText }}</h2>
+            <sc-if value="{{ qIsChoice }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ qOptions }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.onClick }}" style="width:100%;text-align:left;padding:15px 16px;border:1.5px solid {{ o.border }};border-radius:13px;background:{{ o.bg }};cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:12px;transition:all .12s" style-hover="border-color:var(--ac);background:var(--ac-weak)">
+                <span style="font-size:18px">{{ o.emoji }}</span>{{ o.label }}
+              </button>
+              </sc-for>
+            </div>
+            </sc-if>
+            <sc-if value="{{ qIsText }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column">
+              <textarea placeholder="Escribe aquí (opcional)…" style="width:100%;min-height:120px;border:1.5px solid var(--line);border-radius:13px;padding:13px;font-size:14.5px;font-family:inherit;color:var(--ink);outline:none;resize:none" style-focus="border-color:var(--ac)"></textarea>
+              <div style="flex:1"></div>
+              <button onClick="{{ pNext }}" style="width:100%;height:50px;border:none;border-radius:13px;background:var(--ac);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:14px" style-hover="background:var(--ac-d)">Continuar</button>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ fRating }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;flex:1;align-items:center;text-align:center;">
+            <div style="flex:1"></div>
+            <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin:0 0 6px">¿Cómo nos calificarías?</h2>
+            <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 26px">Toca las estrellas</p>
+            <div style="display:flex;gap:6px;margin-bottom:14px">
+              <sc-for list="{{ starButtons }}" as="s" hint-placeholder-count="5">
+              <button onClick="{{ s.onClick }}" onMouseEnter="{{ s.onEnter }}" onMouseLeave="{{ s.onLeave }}" style="background:none;border:none;cursor:pointer;padding:2px;transform:scale({{ s.scale }});transition:transform .12s">
+                <svg width="46" height="46" viewBox="0 0 24 24"><path d="M12 2.6l2.69 5.45 6.01.87-4.35 4.24 1.03 5.99L12 16.3l-5.38 2.83 1.03-5.99L3.3 8.92l6.01-.87z" fill="{{ s.fill }}" stroke="{{ s.stroke }}" stroke-width="1" stroke-linejoin="round"></path></svg>
+              </button>
+              </sc-for>
+            </div>
+            <div style="height:22px;font-size:14px;font-weight:600;color:var(--amber)">{{ ratingLabel }}</div>
+            <div style="flex:1"></div>
+            <button onClick="{{ pSubmitRating }}" disabled="{{ ratingDisabled }}" style="width:100%;height:50px;border:none;border-radius:13px;background:{{ rateBtnBg }};color:{{ rateBtnColor }};font-size:15px;font-weight:600;font-family:inherit;cursor:{{ rateBtnCursor }};transition:all .15s">Enviar calificación</button>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ fHigh }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;flex:1;align-items:center;text-align:center;justify-content:center;">
+            <div style="width:74px;height:74px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:pop .4s ease both">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+            </div>
+            <div style="display:flex;gap:3px;margin-bottom:16px;color:var(--amber);font-size:20px">★★★★★</div>
+            <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 8px">¡Gracias por tu calificación!</h2>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.5;margin:0 0 28px;max-width:240px">Tu opinión nos ayuda muchísimo. ¿Nos dejarías la reseña en Google? Solo toma 10 segundos.</p>
+            <button onClick="{{ pReset }}" style="width:100%;height:50px;border:none;border-radius:13px;background:var(--ac);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px" style-hover="background:var(--ac-d)">
+              <span style="width:20px;height:20px;border-radius:50%;background:#fff;color:var(--ac);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">G</span>Calificar en Google
+            </button>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ fLow }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;flex:1;">
+            <div style="margin:6px 0 4px;font-size:11.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">Tu opinión es privada</div>
+            <h2 style="font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.25;margin:0 0 6px">Gracias por tu sinceridad</h2>
+            <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 18px;line-height:1.5">Cuéntanos qué pasó para poder resolverlo. Esto <b>no</b> se publica.</p>
+            <textarea placeholder="¿Qué podemos mejorar?" style="width:100%;min-height:96px;border:1.5px solid var(--line);border-radius:13px;padding:13px;font-size:14.5px;font-family:inherit;color:var(--ink);outline:none;resize:none;margin-bottom:12px" style-focus="border-color:var(--ac)"></textarea>
+            <input placeholder="Email o teléfono (opcional)" style="width:100%;height:46px;border:1.5px solid var(--line);border-radius:13px;padding:0 14px;font-size:14px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:auto" style-focus="border-color:var(--ac)">
+            <button onClick="{{ pSubmitLow }}" style="width:100%;height:50px;border:none;border-radius:13px;background:var(--ac);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:16px" style-hover="background:var(--ac-d)">Enviar</button>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ fThanks }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;flex:1;align-items:center;text-align:center;justify-content:center;">
+            <div style="width:74px;height:74px;border-radius:50%;background:var(--ac-bg);display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:pop .4s ease both">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+            </div>
+            <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 8px">¡Listo! Gracias por tu tiempo</h2>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.5;margin:0;max-width:230px">Valoramos mucho tu opinión. ¡Que tengas un gran día!</p>
+          </div>
+          </sc-if>
+
+        </div>
+      </div>
+      <button onClick="{{ pReset }}" style="border:none;background:rgba(255,255,255,.16);color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:20px;cursor:pointer;backdrop-filter:blur(4px)">↺ Reiniciar demo · Esc para cerrar</button>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5B5BF0&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;businessName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Café Aroma&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;navDefault&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sidebar&quot;,&quot;topbar&quot;],&quot;default&quot;:&quot;sidebar&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    authed: false,
+    role: 'BUSINESS',
+    section: 'overview',
+    nav: 'sidebar',
+    roleMenuOpen: false,
+    range: '30d',
+    chart: 'bars',
+    reviewFilter: 'all',
+    threshold: 5,
+    previewStep: 0,
+    publicOpen: false,
+    pScreen: 'q1',
+    pRating: 0,
+    pHover: 0,
+  };
+
+  componentDidMount() {
+    if (this.props.accent) document.documentElement.style.setProperty('--ac', this.props.accent);
+    if (this.props.navDefault && this.props.navDefault !== this.state.nav) this.setState({ nav: this.props.navDefault });
+    this._key = (e) => { if (e.key === 'Escape') this.setState({ publicOpen: false }); };
+    window.addEventListener('keydown', this._key);
+  }
+  componentDidUpdate(prev) {
+    if (this.props.accent) document.documentElement.style.setProperty('--ac', this.props.accent);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+
+  // ---------- icons ----------
+  ic(name) {
+    const P = {
+      home: ['M3 11.5L12 4l9 7.5', 'M5 10v10h14V10'],
+      star: ['M12 2.6l2.69 5.45 6.01.87-4.35 4.24 1.03 5.99L12 16.3l-5.38 2.83 1.03-5.99L3.3 8.92l6.01-.87z'],
+      chat: ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'],
+      list: ['M8 6h13', 'M8 12h13', 'M8 18h13', 'M3.5 6h.01', 'M3.5 12h.01', 'M3.5 18h.01'],
+      users: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'],
+      qr: ['M4 4h6v6H4z', 'M14 4h6v6h-6z', 'M4 14h6v6H4z', 'M14 14h3v3h-3z', 'M20 14v3', 'M20 20h.01', 'M17 20h.01'],
+      gear: ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 13a7.5 7.5 0 0 0 0-2l2-1.5-2-3.4-2.3 1a7.5 7.5 0 0 0-1.7-1l-.3-2.5h-4l-.3 2.5a7.5 7.5 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.5a7.5 7.5 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7.5 7.5 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7.5 7.5 0 0 0 1.7-1l2.3 1 2-3.4z'],
+      building: ['M3 21h18', 'M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16', 'M9 8h.01', 'M9 12h.01', 'M9 16h.01', 'M15 8h.01', 'M15 12h.01', 'M15 16h.01'],
+      briefcase: ['M3 8h18v12H3z', 'M8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3'],
+      chart: ['M3 3v18h18', 'M7 14l3-3 3 3 4-5'],
+    };
+    return React.createElement('svg', { width: 17, height: 17, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' }, (P[name] || []).map((d, i) => React.createElement('path', { key: i, d })));
+}
+
+  go(section) { this.setState({ section, roleMenuOpen: false }); }
+  setRole(role) {
+    const def = { SUPER: 'overview', AGENCY: 'overview', BUSINESS: 'overview', SELLER: 'overview' }[role];
+    this.setState({ role, section: def, roleMenuOpen: false });
+}
+  login() { this.setState({ authed: true }); }
+  logout() { this.setState({ authed: false }); }
+
+  // ---------- public flow ----------
+  openPublic() { this.setState({ publicOpen: true, pScreen: 'q1', pRating: 0, pHover: 0 }); }
+  closePublic() { this.setState({ publicOpen: false }); }
+  pReset() { this.setState({ pScreen: 'q1', pRating: 0, pHover: 0 }); }
+  pAdvanceFrom(screen) {
+    const order = ['q1', 'q2', 'q3', 'rating'];
+    const i = order.indexOf(screen);
+    this.setState({ pScreen: order[i + 1] || 'rating' });
+}
+  pNext() { this.pAdvanceFrom(this.state.pScreen); }
+  pSetRating(n) { this.setState({ pRating: n }); }
+  pSubmitRating() {
+    if (!this.state.pRating) return;
+    this.setState({ pScreen: this.state.pRating >= this.state.threshold ? 'high' : 'low' });
+}
+  pSubmitLow() { this.setState({ pScreen: 'thanks' }); }
+
+  // ---------- charts ----------
+  donut(highPct) {
+    return React.createElement('div', { style: { position: 'relative', width: 158, height: 158 } },
+      React.createElement('div', { style: { width: '100%', height: '100%', borderRadius: '50%', background: `conic-gradient(var(--ac) 0 ${highPct}%, #E6E6EC ${highPct}% 100%)` } }),
+      React.createElement('div', { style: { position: 'absolute', inset: 20, borderRadius: '50%', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
+        React.createElement('div', { style: { fontSize: 30, fontWeight: 600, letterSpacing: '-.02em' } }, highPct + '%'),
+        React.createElement('div', { style: { fontSize: 11.5, color: 'var(--ink-3)', marginTop: 1 } }, 'a Google')
+      )
+    );
+}
+  sparkline(data) {
+    const w = 280, h = 70, min = Math.min(...data) - 0.15, max = Math.max(...data) + 0.1;
+    const pts = data.map((v, i) => [(i / (data.length - 1)) * w, h - ((v - min) / (max - min)) * (h - 8) - 4]);
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const area = d + ` L${w} ${h} L0 ${h} Z`;
+    const last = pts[pts.length - 1];
+    return React.createElement('svg', { viewBox: `0 0 ${w} ${h}`, width: '100%', height: h, preserveAspectRatio: 'none', style: { display: 'block' } },
+      React.createElement('defs', null, React.createElement('linearGradient', { id: 'sg', x1: 0, y1: 0, x2: 0, y2: 1 },
+        React.createElement('stop', { offset: '0%', stopColor: 'var(--ac)', stopOpacity: 0.18 }),
+        React.createElement('stop', { offset: '100%', stopColor: 'var(--ac)', stopOpacity: 0 }))),
+      React.createElement('path', { d: area, fill: 'url(#sg)' }),
+      React.createElement('path', { d, fill: 'none', stroke: 'var(--ac)', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', vectorEffect: 'non-scaling-stroke' }),
+      React.createElement('circle', { cx: last[0], cy: last[1], r: 3.5, fill: 'var(--ac)' })
+    );
+}
+
+  avatarColor(i) {
+    const sets = [['#EEF0FF', '#4F46E5'], ['#E9F7EE', '#16A34A'], ['#FDF0E6', '#D97706'], ['#FCE9F0', '#DB2777'], ['#E6F4F8', '#0891B2'], ['#F0ECFA', '#7C3AED']];
+    return sets[i % sets.length];
+}
+
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accent;
+    const businessName = this.props.businessName || 'Café Aroma';
+    const authed = s.authed;
+
+    // ---- role config ----
+    const roleMeta = {
+      SUPER: { label: 'Super Admin', org: '5stars HQ', initials: '5★' },
+      AGENCY: { label: 'Agencia', org: 'Pulse Digital', initials: 'PD' },
+      BUSINESS: { label: 'Negocio', org: businessName, initials: businessName.slice(0, 2).toUpperCase() },
+      SELLER: { label: 'Vendedor', org: 'Lucía Fernández', initials: 'LF' },
+    };
+    const rm = roleMeta[s.role];
+
+    const navDefs = {
+      SUPER: [['overview', 'Resumen', 'home'], ['entities', 'Agencias', 'building'], ['settings', 'Ajustes', 'gear']],
+      AGENCY: [['overview', 'Resumen', 'home'], ['entities', 'Negocios', 'briefcase'], ['settings', 'Ajustes', 'gear']],
+      BUSINESS: [['overview', 'Resumen', 'home'], ['reviews', 'Reseñas', 'chat'], ['questions', 'Preguntas', 'list'], ['sellers', 'Vendedores', 'users'], ['qr', 'Mi QR / Enlace', 'qr'], ['settings', 'Ajustes', 'gear']],
+      SELLER: [['overview', 'Mi rendimiento', 'chart'], ['qr', 'Mi enlace', 'qr']],
+    };
+    const badges = { reviews: s.role === 'BUSINESS' ? '12' : null };
+    const navItems = navDefs[s.role].map(([id, label, icon]) => {
+      const active = s.section === id;
+      return {
+        onClick: () => this.go(id), label,
+        icon: this.ic(icon),
+        bg: active ? 'var(--ac-bg)' : 'transparent',
+        color: active ? 'var(--ac-d)' : 'var(--ink-2)',
+        iconColor: active ? 'var(--ac)' : 'var(--ink-3)',
+        weight: active ? '600' : '500',
+        badge: id === 'reviews' ? badges.reviews : null,
+      };
+    });
+
+    const roleTabs = ['SUPER', 'AGENCY', 'BUSINESS', 'SELLER'].map((r) => ({
+      onClick: () => this.setRole(r),
+      label: roleMeta[r].label,
+      dot: { SUPER: '#7C3AED', AGENCY: '#0891B2', BUSINESS: 'var(--ac)', SELLER: '#16A34A' }[r],
+      bg: s.role === r ? 'var(--ac-weak)' : '#fff',
+      check: s.role === r ? '✓' : '',
+    }));
+
+    const pageTitleMap = { overview: 'Resumen', reviews: 'Reseñas', questions: 'Preguntas', sellers: 'Vendedores', qr: 'Mi QR / Enlace', settings: 'Ajustes', entities: s.role === 'SUPER' ? 'Agencias' : 'Negocios' };
+
+    // ---- range tabs ----
+    const rangeTabs = [['7d', '7 días'], ['30d', '30 días'], ['90d', '90 días']].map(([id, label]) => ({
+      onClick: () => this.setState({ range: id }), label,
+      bg: s.range === id ? '#fff' : 'transparent',
+      border: s.range === id ? 'var(--line)' : 'transparent',
+      color: s.range === id ? 'var(--ink)' : 'var(--ink-3)',
+      weight: s.range === id ? '600' : '500',
+    }));
+
+    // ---- overview data per role ----
+    const isBiz = s.role === 'BUSINESS', isSeller = s.role === 'SELLER', isSuper = s.role === 'SUPER', isAgency = s.role === 'AGENCY';
+
+    let kpis, ovTitle, ovSubtitle, distTitle, distSub, dist, redirCount, internalCount, donutHigh,
+      listTitle, overviewRows, trendTitle, trendSub, trendNow, trendDelta, trendData, trendStart;
+
+    const kpi = (label, icon, iconColor, value, unit, delta, dir, note) => ({
+      label, icon: this.ic(icon), iconColor, value, unit, delta,
+      deltaArrow: dir === 'up' ? '↑' : dir === 'down' ? '↓' : '→',
+      deltaColor: dir === 'up' ? 'var(--green)' : dir === 'down' ? 'var(--red)' : 'var(--ink-3)',
+      deltaNote: note,
+    });
+
+    if (isBiz || isSeller) {
+      ovTitle = isSeller ? 'Hola, Lucía 👋' : 'Resumen de ' + businessName;
+      ovSubtitle = isSeller ? 'Tu rendimiento de reseñas este mes.' : 'Cómo van tus reseñas en los últimos 30 días.';
+      kpis = [
+        kpi('Promedio', 'star', 'var(--amber)', '4.6', '/ 5', '+0.2', 'up', 'vs mes ant.'),
+        kpi('Reseñas', 'chat', 'var(--ac)', isSeller ? '312' : '1.284', '', isSeller ? '+38' : '+146', 'up', 'este mes'),
+        kpi('A Google', 'chart', 'var(--green)', '71', '%', '+4%', 'up', 'redirigidas'),
+        kpi('Internas', 'list', 'var(--ink-3)', '29', '%', '-4%', 'down', 'capturadas'),
+      ];
+      distTitle = 'Distribución de calificaciones';
+      distSub = isSeller ? 'Tus 312 reseñas' : 'Tus 1.284 reseñas';
+      const counts = isSeller ? [9, 14, 22, 67, 200] : [41, 54, 96, 281, 812];
+      const total = counts.reduce((a, b) => a + b, 0);
+      const maxc = Math.max(...counts);
+      dist = [5, 4, 3, 2, 1].map((star) => {
+        const c = counts[star - 1];
+        const fill = star >= 4 ? 'var(--amber)' : star === 3 ? '#F0B86E' : '#E89A8E';
+        return { star, count: c.toLocaleString('es'), pct: Math.round((c / total) * 100), colH: Math.round((c / maxc) * 100), fill };
+      });
+      redirCount = isSeller ? '221' : '912'; internalCount = isSeller ? '91' : '372'; donutHigh = 71;
+      listTitle = 'Reseñas recientes';
+      const recents = [
+        ['JM', 'Excelente atención, volveré seguro. El café espectacular.', 'Lucía F. · hace 2h', '5.0', 'Google', 5],
+        ['SR', 'Muy rico todo pero la espera fue larga un sábado.', 'Martín G. · hace 5h', '3.0', 'Interno', 3],
+        ['AL', 'El mejor flat white de la zona, sin dudas.', 'Sofía P. · ayer', '5.0', 'Google', 5],
+        ['DC', 'Muy amables, pero el local estaba algo frío.', 'Diego C. · ayer', '2.0', 'Interno', 2],
+      ];
+      overviewRows = recents.map(([initials, text, meta, stars, ch], i) => {
+        const [avBg, avColor] = this.avatarColor(i);
+        const goog = ch === 'Google';
+        return { initials, text, meta, stars: stars + ' ★', avBg, avColor, tag: goog ? 'Google' : 'Interno', tagBg: goog ? 'var(--green-bg)' : 'var(--bg)', tagColor: goog ? 'var(--green)' : 'var(--ink-2)' };
+      });
+      trendTitle = 'Tendencia del promedio'; trendSub = 'Últimas 8 semanas';
+      trendNow = '4.6'; trendDelta = '+0.4'; trendData = [4.2, 4.3, 4.3, 4.4, 4.5, 4.5, 4.6, 4.7]; trendStart = 'Hace 8 sem';
+    } else if (isSuper) {
+      ovTitle = 'Resumen global'; ovSubtitle = 'Toda la plataforma 5stars.';
+      kpis = [
+        kpi('Agencias', 'building', '#7C3AED', '24', '', '+3', 'up', 'este mes'),
+        kpi('Negocios', 'briefcase', 'var(--ac)', '418', '', '+27', 'up', 'este mes'),
+        kpi('Reseñas', 'chat', 'var(--green)', '96.4k', '', '+8.1k', 'up', 'este mes'),
+        kpi('Promedio', 'star', 'var(--amber)', '4.5', '/ 5', '+0.1', 'up', 'global'),
+      ];
+      distTitle = 'Reseñas por mes'; distSub = 'Plataforma completa';
+      const counts = [2100, 4800, 7600, 28000, 54000];
+      const total = counts.reduce((a, b) => a + b, 0); const maxc = Math.max(...counts);
+      dist = [5, 4, 3, 2, 1].map((star) => { const c = counts[star - 1]; return { star, count: (c / 1000).toFixed(0) + 'k', pct: Math.round((c / total) * 100), colH: Math.round((c / maxc) * 100), fill: star >= 4 ? 'var(--amber)' : star === 3 ? '#F0B86E' : '#E89A8E' }; });
+      redirCount = '68.4k'; internalCount = '28k'; donutHigh = 71;
+      listTitle = 'Agencias destacadas';
+      overviewRows = [['PD', 'Pulse Digital — 32 negocios activos', '14.2k reseñas', '4.7', 'Google'], ['MA', 'Marca Ágil — 21 negocios', '9.8k reseñas', '4.5', 'Google'], ['LV', 'Local Vivo — 18 negocios', '7.1k reseñas', '4.4', 'Interno']].map(([initials, text, meta, stars, ch], i) => { const [avBg, avColor] = this.avatarColor(i); return { initials, text, meta, stars: stars + ' ★', avBg, avColor, tag: 'Top', tagBg: 'var(--ac-bg)', tagColor: 'var(--ac-d)' }; });
+      trendTitle = 'Crecimiento'; trendSub = 'Reseñas / semana'; trendNow = '96k'; trendDelta = '+9%'; trendData = [62, 68, 71, 75, 80, 84, 90, 96]; trendStart = 'Hace 8 sem';
+    } else {
+      ovTitle = 'Resumen de la agencia'; ovSubtitle = 'Pulse Digital — 32 negocios.';
+      kpis = [
+        kpi('Negocios', 'briefcase', 'var(--ac)', '32', '', '+2', 'up', 'este mes'),
+        kpi('Reseñas', 'chat', 'var(--green)', '14.2k', '', '+1.1k', 'up', 'este mes'),
+        kpi('Promedio', 'star', 'var(--amber)', '4.7', '/ 5', '+0.1', 'up', 'agencia'),
+        kpi('A Google', 'chart', 'var(--green)', '74', '%', '+2%', 'up', 'redirigidas'),
+      ];
+      distTitle = 'Distribución de calificaciones'; distSub = '14.200 reseñas';
+      const counts = [180, 320, 640, 3100, 9960];
+      const total = counts.reduce((a, b) => a + b, 0); const maxc = Math.max(...counts);
+      dist = [5, 4, 3, 2, 1].map((star) => { const c = counts[star - 1]; return { star, count: c.toLocaleString('es'), pct: Math.round((c / total) * 100), colH: Math.round((c / maxc) * 100), fill: star >= 4 ? 'var(--amber)' : star === 3 ? '#F0B86E' : '#E89A8E' }; });
+      redirCount = '10.5k'; internalCount = '3.7k'; donutHigh = 74;
+      listTitle = 'Negocios destacados';
+      overviewRows = [['CA', 'Café Aroma — 1.284 reseñas', 'Lucía + 3 vendedores', '4.6', 'Google'], ['BV', 'Bella Vista Resto — 980', '2 vendedores', '4.8', 'Google'], ['GЗ', 'Gimnasio Zona — 640', '4 vendedores', '4.3', 'Interno']].map(([initials, text, meta, stars], i) => { const [avBg, avColor] = this.avatarColor(i); return { initials, text, meta, stars: stars + ' ★', avBg, avColor, tag: 'Activo', tagBg: 'var(--green-bg)', tagColor: 'var(--green)' }; });
+      trendTitle = 'Tendencia del promedio'; trendSub = 'Últimas 8 semanas'; trendNow = '4.7'; trendDelta = '+0.2'; trendData = [4.4, 4.5, 4.5, 4.6, 4.6, 4.6, 4.7, 4.7]; trendStart = 'Hace 8 sem';
+    }
+
+    // ---- reviews list ----
+    const allReviews = [
+      ['JM', 'Excelente atención, volveré seguro. El café espectacular y el lugar muy lindo.', 'Lucía Fernández', '', 'hace 2h', 5, 'Google'],
+      ['SR', 'Muy rico todo pero la espera fue larga un sábado al mediodía.', 'Martín Gómez', 'sofia@email.com', 'hace 5h', 3, 'Interno'],
+      ['AL', 'El mejor flat white de la zona, sin dudas. Recomendadísimo.', 'Sofía Paz', '', 'ayer', 5, 'Google'],
+      ['DC', 'Muy amables, pero el local estaba frío y faltaba personal.', 'Diego Castro', '+54 11 5555', 'ayer', 2, 'Interno'],
+      ['MV', 'Todo perfecto, los pasteles recién hechos. Volveré.', 'Lucía Fernández', '', 'hace 2 días', 5, 'Google'],
+      ['RT', 'Me cobraron de más y costó que lo corrigieran.', 'Martín Gómez', 'rt@email.com', 'hace 3 días', 1, 'Interno'],
+    ];
+    const reviewFilters = [['all', 'Todas', allReviews.length], ['google', 'A Google', allReviews.filter(r => r[6] === 'Google').length], ['internal', 'Internas', allReviews.filter(r => r[6] === 'Interno').length], ['low', 'Bajas (<5)', allReviews.filter(r => r[5] < 5).length]].map(([id, label, n]) => ({
+      onClick: () => this.setState({ reviewFilter: id }), label: label + ' (' + n + ')',
+      bg: s.reviewFilter === id ? 'var(--ac)' : '#fff', border: s.reviewFilter === id ? 'var(--ac)' : 'var(--line)',
+      color: s.reviewFilter === id ? '#fff' : 'var(--ink-2)', weight: s.reviewFilter === id ? '600' : '500',
+    }));
+    const reviewRows = allReviews.filter(r => s.reviewFilter === 'all' || (s.reviewFilter === 'google' && r[6] === 'Google') || (s.reviewFilter === 'internal' && r[6] === 'Interno') || (s.reviewFilter === 'low' && r[5] < 5)).map(([initials, text, seller, contact, time, stars, ch], i) => {
+      const [avBg, avColor] = this.avatarColor(i);
+      const goog = ch === 'Google';
+      return { initials, text, seller, contact, time, avBg, avColor, starsGlyph: '★★★★★'.slice(0, stars) + '☆☆☆☆☆'.slice(0, 5 - stars), tag: goog ? 'Pública en Google' : 'Capturada (privada)', tagBg: goog ? 'var(--green-bg)' : 'var(--red-bg)', tagColor: goog ? 'var(--green)' : 'var(--red)' };
+    });
+
+    // ---- questions ----
+    const questionRows = [
+      { n: 1, title: '¿Cómo fue tu experiencia hoy?', type: 'Opción múltiple', options: ['Excelente', 'Buena', 'Regular', 'Mala'] },
+      { n: 2, title: '¿Qué fue lo que más te gustó?', type: 'Opción múltiple', options: ['Atención', 'Producto', 'Rapidez', 'Precio'] },
+      { n: 3, title: '¿Algo que podamos mejorar?', type: 'Texto abierto · opcional', options: [] },
+    ].map((q, i) => ({ ...q, hasOptions: q.options.length > 0, toggleBg: 'var(--ac)', knobX: '16px', active: (s.previewStep || 0) === i, cardBorder: (s.previewStep || 0) === i ? 'var(--ac)' : 'var(--line)', cardBg: (s.previewStep || 0) === i ? 'var(--ac-weak)' : 'var(--card)', onClick: () => this.setState({ previewStep: i }) }));
+
+    // ---- sellers ----
+    const sellerRows = [['Lucía Fernández', 'lucia@cafearoma.com', '312', '4.7', 78], ['Martín Gómez', 'martin@cafearoma.com', '280', '4.5', 70], ['Sofía Paz', 'sofia@cafearoma.com', '244', '4.6', 73], ['Diego Castro', 'diego@cafearoma.com', '198', '4.4', 65], ['Sin asignar', 'link general', '250', '4.5', 69]].map(([name, email, reviews, avg, pct], i) => { const [avBg, avColor] = this.avatarColor(i); return { name, email, reviews, avg, pct, initials: name === 'Sin asignar' ? '—' : name.split(' ').map(w => w[0]).join('').slice(0, 2), avBg, avColor }; });
+
+    // ---- entities (super/agency) ----
+    let entTitle, entSub, entCta, entCol1, entCol2, entityRows;
+    if (isSuper) {
+      entTitle = 'Agencias'; entSub = '24 agencias en la plataforma.'; entCta = '+ Nueva agencia'; entCol1 = 'Agencia'; entCol2 = 'Negocios';
+      entityRows = [['Pulse Digital', 'pulsedigital.com', '32', '14.2k', '4.7', 'Activa'], ['Marca Ágil', 'marcaagil.io', '21', '9.8k', '4.5', 'Activa'], ['Local Vivo', 'localvivo.com', '18', '7.1k', '4.4', 'Activa'], ['Reseña+', 'resenamas.com', '12', '4.3k', '4.6', 'Activa'], ['Boost Local', 'boostlocal.ar', '8', '2.1k', '4.2', 'Prueba']].map(([name, sub, col2, reviews, avg, status], i) => { const [avBg, avColor] = this.avatarColor(i); return { name, sub, col2, reviews, avg, status, initials: name.slice(0, 2).toUpperCase(), avBg, avColor, stBg: status === 'Activa' ? 'var(--green-bg)' : 'var(--ac-bg)', stColor: status === 'Activa' ? 'var(--green)' : 'var(--ac-d)' }; });
+    } else {
+      entTitle = 'Negocios'; entSub = 'Pulse Digital — 32 negocios.'; entCta = '+ Nuevo negocio'; entCol1 = 'Negocio'; entCol2 = 'Vendedores';
+      entityRows = [['Café Aroma', 'Cafetería · Palermo', '4', '1.284', '4.6', 'Activo'], ['Bella Vista Resto', 'Restaurante · Centro', '2', '980', '4.8', 'Activo'], ['Gimnasio Zona', 'Fitness · Belgrano', '4', '640', '4.3', 'Activo'], ['Óptica Clara', 'Salud · Caballito', '1', '410', '4.7', 'Activo'], ['Barbería Norte', 'Belleza · Núñez', '3', '290', '4.2', 'Prueba']].map(([name, sub, col2, reviews, avg, status], i) => { const [avBg, avColor] = this.avatarColor(i); return { name, sub, col2, reviews, avg, status, initials: name.slice(0, 2).toUpperCase(), avBg, avColor, stBg: status === 'Activo' ? 'var(--green-bg)' : 'var(--ac-bg)', stColor: status === 'Activo' ? 'var(--green)' : 'var(--ac-d)' }; });
+    }
+
+    // ---- chart tabs ----
+    const chartTabs = [['bars', 'Barras'], ['cols', 'Columnas']].map(([id, label]) => ({
+      onClick: () => this.setState({ chart: id }), label,
+      bg: s.chart === id ? '#fff' : 'transparent', color: s.chart === id ? 'var(--ink)' : 'var(--ink-3)',
+    }));
+
+    // ---- threshold buttons ----
+    const thresholdBtns = [1, 2, 3, 4, 5].map((n) => ({
+      onClick: () => this.setState({ threshold: n }), label: n,
+      bg: s.threshold === n ? 'var(--ac)' : '#fff', border: s.threshold === n ? 'var(--ac)' : 'var(--line)',
+      color: s.threshold === n ? '#fff' : 'var(--ink-2)',
+    }));
+
+    // ---- public flow screens ----
+    const questions = [
+      { label: 'Pregunta 1 de 3', text: '¿Cómo fue tu experiencia hoy?', choice: true, options: [['😍', 'Excelente'], ['🙂', 'Buena'], ['😐', 'Regular'], ['😞', 'Mala']] },
+      { label: 'Pregunta 2 de 3', text: '¿Qué fue lo que más te gustó?', choice: true, options: [['💬', 'La atención'], ['☕', 'El producto'], ['⚡', 'La rapidez'], ['💲', 'El precio']] },
+      { label: 'Pregunta 3 de 3', text: '¿Algo que podamos mejorar?', choice: false, options: [] },
+    ];
+    const scr = s.pScreen;
+    const qIdx = { q1: 0, q2: 1, q3: 2 }[scr];
+    const curQ = qIdx != null ? questions[qIdx] : null;
+    const fQuestion = curQ != null;
+    const fRating = scr === 'rating', fHigh = scr === 'high', fLow = scr === 'low', fThanks = scr === 'thanks';
+
+    const stepOrder = ['q1', 'q2', 'q3', 'rating'];
+    let pProgress;
+    if (fHigh || fLow || fThanks) pProgress = 100;
+    else pProgress = Math.round((stepOrder.indexOf(scr) / stepOrder.length) * 100);
+
+    const qOptions = curQ && curQ.choice ? curQ.options.map(([emoji, label]) => ({ emoji, label, border: 'var(--line)', bg: '#fff', onClick: () => this.pAdvanceFrom(scr) })) : [];
+
+    const rateVal = s.pHover || s.pRating;
+    const starButtons = [1, 2, 3, 4, 5].map((n) => {
+      const on = n <= rateVal;
+      return {
+        onClick: () => this.pSetRating(n), onEnter: () => this.setState({ pHover: n }), onLeave: () => this.setState({ pHover: 0 }),
+        fill: on ? 'var(--amber)' : '#EDEDF2', stroke: on ? 'var(--amber)' : '#DDD',
+        scale: (s.pHover === n) ? '1.18' : (s.pRating === n && !s.pHover) ? '1.1' : '1',
+      };
+    });
+    const ratingLabels = ['', 'Muy mala 😞', 'Mala', 'Regular', 'Buena 🙂', '¡Excelente! 🤩'];
+    const ratingLabel = ratingLabels[rateVal] || '';
+    const ratingDisabled = !s.pRating;
+
+    // ---- inline preview (constructor de preguntas) ----
+    const pvIdx = Math.min(Math.max(s.previewStep || 0, 0), 3);
+    const pvIsRating = pvIdx === 3;
+    const pvQ = pvIsRating ? null : questions[pvIdx];
+    const pvLabel = pvIsRating ? 'Paso final' : questions[pvIdx].label;
+    const pvText = pvIsRating ? '¿Cómo nos calificarías?' : pvQ.text;
+    const pvIsChoice = !pvIsRating && pvQ.choice;
+    const pvIsText = !pvIsRating && !pvQ.choice;
+    const pvOptions = pvIsChoice ? pvQ.options.map(([emoji, label]) => ({ emoji, label })) : [];
+    const pvProgress = Math.round((pvIdx / 3) * 100);
+    const pvStars = [0, 1, 2, 3, 4];
+    const pvDots = [0, 1, 2, 3].map((i) => ({ onClick: () => this.setState({ previewStep: i }), bg: i === pvIdx ? 'var(--ac)' : '#D8D8DF', w: i === pvIdx ? '18px' : '6px' }));
+    const pvStepLabel = 'Paso ' + (pvIdx + 1) + ' de 4';
+    const pvPrev = () => this.setState({ previewStep: Math.max(0, pvIdx - 1) });
+    const pvNext = () => this.setState({ previewStep: Math.min(3, pvIdx + 1) });
+    const pvPrevColor = pvIdx === 0 ? '#D8D8DF' : 'var(--ink-2)';
+    const pvNextColor = pvIdx === 3 ? '#D8D8DF' : 'var(--ink-2)';
+
+    return {
+      isLogin: !authed, isApp: authed,
+      isSidebar: s.nav === 'sidebar', isTopbar: s.nav === 'topbar',
+      orgName: rm.org, orgInitials: rm.initials, roleLabel: rm.label,
+      roleMenuOpen: s.roleMenuOpen, toggleRoleMenu: () => this.setState({ roleMenuOpen: !s.roleMenuOpen }),
+      navItems, roleTabs,
+      pageTitle: pageTitleMap[s.section] || 'Resumen',
+      contentKey: s.role + '-' + s.section,
+      login: () => this.login(), logout: () => this.logout(),
+      openPublic: () => this.openPublic(), closePublic: () => this.closePublic(), stop: (e) => e.stopPropagation(),
+
+      showOverview: s.section === 'overview', showReviews: s.section === 'reviews',
+      showQuestions: s.section === 'questions', showSellers: s.section === 'sellers',
+      showQR: s.section === 'qr', showSettings: s.section === 'settings', showEntities: s.section === 'entities',
+
+      rangeTabs, kpis, ovTitle, ovSubtitle,
+      distTitle, distSub, dist, chartTabs, chartIsBars: s.chart === 'bars', chartIsCols: s.chart === 'cols',
+      donutChart: this.donut(donutHigh), redirCount, internalCount,
+      listTitle, overviewRows, goListFromOverview: () => this.go(isSuper || isAgency ? 'entities' : 'reviews'),
+      trendTitle, trendSub, trendNow, trendDelta, trendStart, trendChart: this.sparkline(trendData),
+
+      reviewFilters, reviewRows,
+      questionRows, threshold: s.threshold,
+      pvLabel, pvText, pvIsChoice, pvIsText, pvOptions, pvProgress, pvStars, pvDots, pvStepLabel, pvIsRating,
+      pvPrev, pvNext, pvPrevColor, pvNextColor,
+      goPreviewRating: () => this.setState({ previewStep: 3 }),
+      sellerRows,
+      qrTitle: isSeller ? 'Mi enlace / QR' : 'Mi QR / Enlace', publicLink: '5stars.app/r/' + (isSeller ? 'cafearoma-lucia' : 'cafearoma'), qrScans: '1.140', qrReviews: '286',
+      entTitle, entSub, entCta, entCol1, entCol2, entityRows,
+      thresholdBtns,
+
+      publicOpen: s.publicOpen, businessName,
+      pScreen: scr, pProgress,
+      fQuestion, qStepLabel: curQ ? curQ.label : '', qText: curQ ? curQ.text : '',
+      qIsChoice: curQ ? curQ.choice : false, qIsText: curQ ? !curQ.choice : false, qOptions,
+      pNext: () => this.pNext(),
+      fRating, starButtons, ratingLabel, ratingDisabled,
+      pSubmitRating: () => this.pSubmitRating(),
+      rateBtnBg: s.pRating ? 'var(--ac)' : '#EDEDF2', rateBtnColor: s.pRating ? '#fff' : 'var(--ink-3)', rateBtnCursor: s.pRating ? 'pointer' : 'not-allowed',
+      fHigh, fLow, fThanks,
+      pSubmitLow: () => this.pSubmitLow(), pReset: () => this.pReset(),
+    };
+  }
+}
+</script>
+</body>
+</html>

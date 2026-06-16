@@ -1,57 +1,206 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
-import { aggregateMetrics } from "@/lib/metrics";
+import { aggregateMetrics, googlePct, inWindow, weeklyAverageTrend } from "@/lib/metrics";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { DistributionChart } from "@/components/charts/DistributionChart";
+import { RatingDonut } from "@/components/charts/RatingDonut";
+import { TrendChart } from "@/components/charts/TrendChart";
 import { createBusiness } from "./actions";
+// Componentes compartidos entre Super y Agencia (viven en super/_components).
+import { CreateEntityForm } from "../super/_components/CreateEntityForm";
+import { EntityTable, type EntityRow } from "../super/_components/EntityTable";
+import { dir, signed } from "../super/_components/kpi-format";
 
-export default async function AgencyPage() {
+const DAY_MS = 86_400_000;
+
+export default async function AgencyOverview() {
   const user = await requireUser();
-  if (user.role !== "AGENCY_ADMIN" || !user.agencyId) return <p>No autorizado.</p>;
-  const businesses = await prisma.business.findMany({
-    where: { agencyId: user.agencyId },
-    include: { _count: { select: { reviews: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-  const reviews = await prisma.review.findMany({
-    where: { business: { agencyId: user.agencyId } },
-    select: { starRating: true, outcome: true },
-  });
-  const m = aggregateMetrics(reviews);
-  return (
-    <div className="space-y-8">
-      <section className="grid grid-cols-3 gap-4">
-        <Stat label="Reviews" value={m.total} />
-        <Stat label="Promedio" value={m.average} />
-        <Stat label="A Google" value={m.redirected} />
-      </section>
-      <section>
-        <h1 className="mb-4 text-xl font-bold">Negocios</h1>
-        <ul className="space-y-2">
-          {businesses.map((b) => (
-            <li key={b.id} className="rounded border p-3">
-              {b.name} — {b._count.reviews} reviews — <code>/r/{b.slug}</code>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2 className="mb-2 font-semibold">Crear negocio</h2>
-        <form action={createBusiness} className="grid max-w-md gap-2">
-          <input name="name" placeholder="Nombre negocio" className="rounded border p-2" required />
-          <input name="googleReviewUrl" type="url" placeholder="URL reseña Google" className="rounded border p-2" required />
-          <input name="adminEmail" type="email" placeholder="Email admin negocio" className="rounded border p-2" required />
-          <input name="adminPassword" type="password" placeholder="Contraseña" className="rounded border p-2" required />
-          <button className="rounded bg-black p-2 text-white">Crear</button>
-        </form>
-      </section>
-    </div>
-  );
-}
+  if (user.role !== "AGENCY_ADMIN" || !user.agencyId) {
+    return <p className="text-body text-ink-2">No autorizado.</p>;
+  }
+  const agencyId = user.agencyId;
 
-function Stat({ label, value }: { label: string; value: number }) {
+  const now = new Date();
+  const monthStart = new Date(now.getTime() - 30 * DAY_MS);
+  const prevStart = new Date(now.getTime() - 60 * DAY_MS);
+
+  const [agency, businesses, newBusinesses, reviews] = await Promise.all([
+    prisma.agency.findUnique({ where: { id: agencyId }, select: { name: true } }),
+    prisma.business.findMany({
+      where: { agencyId },
+      include: { _count: { select: { sellers: true, reviews: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.business.count({ where: { agencyId, createdAt: { gte: monthStart } } }),
+    // Historial de la agencia para KPIs, distribución y tendencia. TODO: precalcular
+    // agregados para grandes volúmenes.
+    prisma.review.findMany({
+      where: { business: { agencyId } },
+      select: { starRating: true, outcome: true, createdAt: true, businessId: true },
+    }),
+  ]);
+
+  const reviewLikes = reviews.map((r) => ({
+    starRating: r.starRating,
+    outcome: r.outcome,
+    createdAt: r.createdAt,
+  }));
+  const all = aggregateMetrics(reviewLikes);
+  const cur = aggregateMetrics(inWindow(reviewLikes, monthStart));
+  const prev = aggregateMetrics(inWindow(reviewLikes, prevStart, monthStart));
+  const gPct = googlePct(all);
+  const prevGPct = googlePct(prev);
+  const curGPct = googlePct(cur);
+
+  // Reseñas por negocio para el promedio de cada fila.
+  const byBusiness = new Map<string, { starRating: number; outcome: typeof reviews[number]["outcome"] }[]>();
+  for (const r of reviews) {
+    const arr = byBusiness.get(r.businessId);
+    if (arr) arr.push({ starRating: r.starRating, outcome: r.outcome });
+    else byBusiness.set(r.businessId, [{ starRating: r.starRating, outcome: r.outcome }]);
+  }
+
+  const kpis = [
+    {
+      label: "Negocios",
+      icon: "briefcase" as const,
+      iconColor: "var(--ac)",
+      value: businesses.length.toLocaleString("es"),
+      delta: signed(newBusinesses),
+      dir: dir(newBusinesses),
+      note: "este mes",
+    },
+    {
+      label: "Reseñas",
+      icon: "chat" as const,
+      iconColor: "var(--green)",
+      value: all.total.toLocaleString("es"),
+      delta: signed(cur.total),
+      dir: dir(cur.total),
+      note: "este mes",
+    },
+    {
+      label: "Promedio",
+      icon: "star" as const,
+      iconColor: "var(--amber)",
+      value: all.average.toFixed(1),
+      unit: "/ 5",
+      delta: signed(Math.round((cur.average - prev.average) * 10) / 10, 1),
+      dir: dir(cur.average - prev.average),
+      note: "agencia",
+    },
+    {
+      label: "A Google",
+      icon: "chart" as const,
+      iconColor: "var(--green)",
+      value: String(gPct),
+      unit: "%",
+      delta: signed(curGPct - prevGPct, 0, "%"),
+      dir: dir(curGPct - prevGPct),
+      note: "redirigidas",
+    },
+  ];
+
+  const dist = [5, 4, 3, 2, 1].map((star) => {
+    const count = all.distribution[star as 1 | 2 | 3 | 4 | 5];
+    return { star, count, pct: all.total === 0 ? 0 : Math.round((count / all.total) * 100) };
+  });
+  const trend = weeklyAverageTrend(reviewLikes, now, 8);
+  const trendDelta = Math.round((trend[trend.length - 1] - trend[0]) * 10) / 10;
+
+  const rows: EntityRow[] = businesses.map((b) => {
+    const m = aggregateMetrics(byBusiness.get(b.id) ?? []);
+    return {
+      id: b.id,
+      name: b.name,
+      sub: `/r/${b.slug}`,
+      col2: b._count.sellers.toLocaleString("es"),
+      reviews: m.total.toLocaleString("es"),
+      avg: m.average,
+      active: m.total > 0,
+    };
+  });
+
+  const agencyName = agency?.name ?? "Tu agencia";
+
   return (
-    <div className="rounded border p-4 text-center">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
+    <div>
+      <PageHeader
+        title="Resumen de la agencia"
+        subtitle={`${agencyName} — ${businesses.length} ${businesses.length === 1 ? "negocio" : "negocios"}.`}
+      />
+
+      <div className="mb-[14px] grid grid-cols-2 gap-grid sm:grid-cols-4">
+        {kpis.map((k) => (
+          <KpiCard key={k.label} {...k} />
+        ))}
+      </div>
+
+      <div className="mb-[14px] grid grid-cols-1 gap-grid lg:grid-cols-[1.55fr_1fr]">
+        <Card>
+          <DistributionChart data={dist} />
+        </Card>
+        <Card className="flex flex-col">
+          <div className="text-card-title font-semibold text-ink">Destino de las reseñas</div>
+          <div className="mb-2 mt-0.5 text-[12px] text-ink-3">Redirigidas vs. capturadas</div>
+          <div className="my-1.5 flex flex-1 items-center justify-center">
+            <RatingDonut highPct={gPct} />
+          </div>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2.5 text-meta">
+              <span className="size-2.5 rounded-[3px] bg-accent" />
+              <span className="flex-1 text-ink-2">A Google (públicas)</span>
+              <b className="text-ink">{all.redirected.toLocaleString("es")}</b>
+            </div>
+            <div className="flex items-center gap-2.5 text-meta">
+              <span className="size-2.5 rounded-[3px] bg-[#E3E3EA]" />
+              <span className="flex-1 text-ink-2">Internas (privadas)</span>
+              <b className="text-ink">{(all.total - all.redirected).toLocaleString("es")}</b>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="mb-8 grid grid-cols-1 gap-grid">
+        <Card>
+          <div className="text-card-title font-semibold text-ink">Tendencia del promedio</div>
+          <div className="mb-1.5 mt-0.5 text-[12px] text-ink-3">Últimas 8 semanas · todos tus negocios</div>
+          <div className="my-1 mb-3 flex items-baseline gap-2">
+            <span className="text-[26px] font-semibold tracking-tight text-ink">
+              {trend[trend.length - 1].toFixed(1)}
+            </span>
+            <span className={`text-meta font-semibold ${trendDelta >= 0 ? "text-green" : "text-red"}`}>
+              {signed(trendDelta, 1)}
+            </span>
+          </div>
+          <TrendChart data={trend} />
+        </Card>
+      </div>
+
+      <section>
+        <CreateEntityForm
+          title="Negocios"
+          subtitle={`${agencyName} — ${businesses.length} ${businesses.length === 1 ? "negocio" : "negocios"}.`}
+          cta="+ Nuevo negocio"
+          submitLabel="Crear negocio"
+          action={createBusiness}
+          fields={[
+            { name: "name", label: "Nombre del negocio", placeholder: "Café Aroma" },
+            { name: "googleReviewUrl", label: "URL de reseña de Google", type: "url", placeholder: "https://g.page/tu-negocio/review" },
+            { name: "adminEmail", label: "Email del admin", type: "email", placeholder: "admin@negocio.com", autoComplete: "off" },
+            { name: "adminPassword", label: "Contraseña", type: "password", placeholder: "Mínimo 6 caracteres", autoComplete: "new-password" },
+          ]}
+        />
+        <EntityTable
+          col1Label="Negocio"
+          col2Label="Vendedores"
+          activeLabel="Activo"
+          rows={rows}
+          emptyHint="Aún no hay negocios. Creá el primero con “+ Nuevo negocio”."
+        />
+      </section>
     </div>
   );
 }

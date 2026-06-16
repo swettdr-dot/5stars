@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 
@@ -29,17 +30,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role;
-        token.agencyId = (user as any).agencyId;
-        token.businessId = (user as any).businessId;
+        const u = user as { role: Role; agencyId: string | null; businessId: string | null };
+        token.role = u.role;
+        token.agencyId = u.agencyId;
+        token.businessId = u.businessId;
       }
       return token;
     },
     session({ session, token }) {
-      (session.user as any).role = token.role;
-      (session.user as any).agencyId = token.agencyId;
-      (session.user as any).businessId = token.businessId;
-      (session.user as any).id = token.sub;
+      const u = session.user as {
+        role?: Role;
+        agencyId?: string | null;
+        businessId?: string | null;
+        id?: string;
+      };
+      u.role = token.role as Role;
+      u.agencyId = (token.agencyId ?? null) as string | null;
+      u.businessId = (token.businessId ?? null) as string | null;
+      u.id = token.sub;
       return session;
     },
   },
