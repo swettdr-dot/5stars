@@ -9,7 +9,7 @@ const inputClass =
   "placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-bg";
 
 /** CTA "+ Nuevo vendedor" + modal con el alta. Usa el Server Action `createSeller`. */
-export function NewSellerDialog() {
+export function NewSellerDialog({ businessId }: { businessId: string }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(createSeller, INITIAL);
@@ -40,6 +40,7 @@ export function NewSellerDialog() {
         className="m-auto w-[380px] max-w-[calc(100vw-32px)] rounded-card border border-line bg-card p-0 text-ink backdrop:bg-ink/20"
       >
         <form ref={formRef} action={formAction} className="flex flex-col gap-4 p-[22px]">
+          <input type="hidden" name="businessId" value={businessId} />
           <div>
             <h2 id="new-seller-title" className="text-card-title font-semibold tracking-tight">
               Nuevo vendedor
