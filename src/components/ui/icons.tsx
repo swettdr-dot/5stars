@@ -9,7 +9,8 @@ export type IconName =
   | "star"
   | "chat"
   | "search"
-  | "qr";
+  | "qr"
+  | "image";
 
 /** Iconos de línea (stroke 1.7) al estilo del handoff. Reemplazables por Lucide. */
 export function Icon({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {
@@ -99,6 +100,14 @@ export function Icon({ name, size = 18, className }: { name: IconName; size?: nu
           <rect x="14" y="3" width="7" height="7" rx="1" />
           <rect x="3" y="14" width="7" height="7" rx="1" />
           <path d="M14 14h3v3M21 14v.01M21 21v-4M17 21h4M14 21v-3" />
+        </svg>
+      );
+    case "image":
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="8.5" cy="9.5" r="1.5" />
+          <path d="m21 16-5-5L5 20" />
         </svg>
       );
   }
