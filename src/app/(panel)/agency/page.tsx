@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { aggregateMetrics, googlePct, inWindow, weeklyAverageTrend } from "@/lib/metrics";
+import { resolveDateRange } from "@/lib/date-ranges";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/KpiCard";
@@ -8,6 +10,7 @@ import { DistributionChart } from "@/components/charts/DistributionChart";
 import { RatingDonut } from "@/components/charts/RatingDonut";
 import { TrendChart } from "@/components/charts/TrendChart";
 import { createBusiness } from "./actions";
+import { BusinessFilterBar } from "./_components/BusinessFilterBar";
 // Componentes compartidos entre Super y Agencia (viven en super/_components).
 import { CreateEntityForm } from "../super/_components/CreateEntityForm";
 import { EntityTable, type EntityRow } from "../super/_components/EntityTable";
@@ -15,7 +18,11 @@ import { dir, signed } from "../super/_components/kpi-format";
 
 const DAY_MS = 86_400_000;
 
-export default async function AgencyOverview() {
+export default async function AgencyOverview({
+  searchParams,
+}: {
+  searchParams: Promise<{ business?: string; range?: string; from?: string; to?: string }>;
+}) {
   const user = await requireUser();
   if (user.role !== "AGENCY_ADMIN" || !user.agencyId) {
     return <p className="text-body text-ink-2">No autorizado.</p>;
@@ -23,8 +30,9 @@ export default async function AgencyOverview() {
   const agencyId = user.agencyId;
 
   const now = new Date();
+  const sp = await searchParams;
+  const win = resolveDateRange(sp, now);
   const monthStart = new Date(now.getTime() - 30 * DAY_MS);
-  const prevStart = new Date(now.getTime() - 60 * DAY_MS);
 
   const [agency, businesses, newBusinesses, reviews] = await Promise.all([
     prisma.agency.findUnique({ where: { id: agencyId }, select: { name: true } }),
@@ -42,19 +50,24 @@ export default async function AgencyOverview() {
     }),
   ]);
 
-  const reviewLikes = reviews.map((r) => ({
+  // Valida el negocio seleccionado contra los de la agencia (si no pertenece, todos).
+  const selected = businesses.find((b) => b.id === sp.business) ?? null;
+  const businessId = selected?.id ?? null;
+
+  // Reseñas acotadas al negocio seleccionado (o todas las de la agencia).
+  const scoped = businessId ? reviews.filter((r) => r.businessId === businessId) : reviews;
+  const scopedLikes = scoped.map((r) => ({
     starRating: r.starRating,
     outcome: r.outcome,
     createdAt: r.createdAt,
   }));
-  const all = aggregateMetrics(reviewLikes);
-  const cur = aggregateMetrics(inWindow(reviewLikes, monthStart));
-  const prev = aggregateMetrics(inWindow(reviewLikes, prevStart, monthStart));
-  const gPct = googlePct(all);
-  const prevGPct = googlePct(prev);
-  const curGPct = googlePct(cur);
 
-  // Reseñas por negocio para el promedio de cada fila.
+  const cur = aggregateMetrics(inWindow(scopedLikes, win.start, win.end));
+  const prev = aggregateMetrics(inWindow(scopedLikes, win.prevStart, win.prevEnd));
+  const gPct = googlePct(cur);
+  const prevGPct = googlePct(prev);
+
+  // Reseñas por negocio para el promedio de cada fila de la tabla (siempre todas).
   const byBusiness = new Map<string, { starRating: number; outcome: typeof reviews[number]["outcome"] }[]>();
   for (const r of reviews) {
     const arr = byBusiness.get(r.businessId);
@@ -62,34 +75,45 @@ export default async function AgencyOverview() {
     else byBusiness.set(r.businessId, [{ starRating: r.starRating, outcome: r.outcome }]);
   }
 
+  // Primer KPI: "Negocios" (todos) o "Vendedores" (negocio seleccionado).
+  const firstKpi = selected
+    ? {
+        label: "Vendedores",
+        icon: "users" as const,
+        iconColor: "var(--ac)",
+        value: selected._count.sellers.toLocaleString("es"),
+        note: selected.name,
+      }
+    : {
+        label: "Negocios",
+        icon: "briefcase" as const,
+        iconColor: "var(--ac)",
+        value: businesses.length.toLocaleString("es"),
+        delta: signed(newBusinesses),
+        dir: dir(newBusinesses),
+        note: "este mes",
+      };
+
   const kpis = [
-    {
-      label: "Negocios",
-      icon: "briefcase" as const,
-      iconColor: "var(--ac)",
-      value: businesses.length.toLocaleString("es"),
-      delta: signed(newBusinesses),
-      dir: dir(newBusinesses),
-      note: "este mes",
-    },
+    firstKpi,
     {
       label: "Reseñas",
       icon: "chat" as const,
       iconColor: "var(--green)",
-      value: all.total.toLocaleString("es"),
-      delta: signed(cur.total),
-      dir: dir(cur.total),
-      note: "este mes",
+      value: cur.total.toLocaleString("es"),
+      delta: signed(cur.total - prev.total),
+      dir: dir(cur.total - prev.total),
+      note: "vs. periodo ant.",
     },
     {
       label: "Promedio",
       icon: "star" as const,
       iconColor: "var(--amber)",
-      value: all.average.toFixed(1),
+      value: cur.average.toFixed(1),
       unit: "/ 5",
       delta: signed(Math.round((cur.average - prev.average) * 10) / 10, 1),
       dir: dir(cur.average - prev.average),
-      note: "agencia",
+      note: "vs. periodo ant.",
     },
     {
       label: "A Google",
@@ -97,17 +121,18 @@ export default async function AgencyOverview() {
       iconColor: "var(--green)",
       value: String(gPct),
       unit: "%",
-      delta: signed(curGPct - prevGPct, 0, "%"),
-      dir: dir(curGPct - prevGPct),
+      delta: signed(gPct - prevGPct, 0, "%"),
+      dir: dir(gPct - prevGPct),
       note: "redirigidas",
     },
   ];
 
   const dist = [5, 4, 3, 2, 1].map((star) => {
-    const count = all.distribution[star as 1 | 2 | 3 | 4 | 5];
-    return { star, count, pct: all.total === 0 ? 0 : Math.round((count / all.total) * 100) };
+    const count = cur.distribution[star as 1 | 2 | 3 | 4 | 5];
+    return { star, count, pct: cur.total === 0 ? 0 : Math.round((count / cur.total) * 100) };
   });
-  const trend = weeklyAverageTrend(reviewLikes, now, 8);
+  // La tendencia respeta el negocio seleccionado pero no el rango de fechas.
+  const trend = weeklyAverageTrend(scopedLikes, now, 8);
   const trendDelta = Math.round((trend[trend.length - 1] - trend[0]) * 10) / 10;
 
   const rows: EntityRow[] = businesses.map((b) => {
@@ -124,12 +149,24 @@ export default async function AgencyOverview() {
   });
 
   const agencyName = agency?.name ?? "Tu agencia";
+  const scopeLabel = selected ? selected.name : "todos los negocios";
 
   return (
     <div>
       <PageHeader
         title="Resumen de la agencia"
-        subtitle={`${agencyName} — ${businesses.length} ${businesses.length === 1 ? "negocio" : "negocios"}.`}
+        subtitle={`${scopeLabel} · ${win.label}.`}
+        actions={
+          <Suspense fallback={null}>
+            <BusinessFilterBar
+              businesses={businesses.map((b) => ({ id: b.id, name: b.name }))}
+              business={businessId}
+              range={win.range}
+              from={sp.from ?? ""}
+              to={sp.to ?? ""}
+            />
+          </Suspense>
+        }
       />
 
       <div className="mb-[14px] grid grid-cols-2 gap-grid sm:grid-cols-4">
@@ -152,12 +189,12 @@ export default async function AgencyOverview() {
             <div className="flex items-center gap-2.5 text-meta">
               <span className="size-2.5 rounded-[3px] bg-accent" />
               <span className="flex-1 text-ink-2">A Google (públicas)</span>
-              <b className="text-ink">{all.redirected.toLocaleString("es")}</b>
+              <b className="text-ink">{cur.redirected.toLocaleString("es")}</b>
             </div>
             <div className="flex items-center gap-2.5 text-meta">
               <span className="size-2.5 rounded-[3px] bg-[#E3E3EA]" />
               <span className="flex-1 text-ink-2">Internas (privadas)</span>
-              <b className="text-ink">{(all.total - all.redirected).toLocaleString("es")}</b>
+              <b className="text-ink">{(cur.total - cur.redirected).toLocaleString("es")}</b>
             </div>
           </div>
         </Card>
@@ -166,7 +203,9 @@ export default async function AgencyOverview() {
       <div className="mb-8 grid grid-cols-1 gap-grid">
         <Card>
           <div className="text-card-title font-semibold text-ink">Tendencia del promedio</div>
-          <div className="mb-1.5 mt-0.5 text-[12px] text-ink-3">Últimas 8 semanas · todos tus negocios</div>
+          <div className="mb-1.5 mt-0.5 text-[12px] text-ink-3">
+            Últimas 8 semanas · {scopeLabel}
+          </div>
           <div className="my-1 mb-3 flex items-baseline gap-2">
             <span className="text-[26px] font-semibold tracking-tight text-ink">
               {trend[trend.length - 1].toFixed(1)}
@@ -198,7 +237,7 @@ export default async function AgencyOverview() {
           col2Label="Vendedores"
           activeLabel="Activo"
           rows={rows}
-          emptyHint="Aún no hay negocios. Creá el primero con “+ Nuevo negocio”."
+          emptyHint="Aún no hay negocios. Crea el primero con &quot;+ Nuevo negocio&quot;."
         />
       </section>
     </div>
