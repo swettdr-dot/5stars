@@ -3,7 +3,13 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { marketingBusinessWhere } from "@/lib/marketing/context";
-import { brandKitSchema } from "@/lib/marketing/brand-kit";
+import { brandKitSchema, resolveBrandKit } from "@/lib/marketing/brand-kit";
+import { z } from "zod";
+import { renderPostPng } from "@/lib/marketing/render";
+import { uploadPostImage, blobKey } from "@/lib/marketing/storage";
+import { isTemplateKey } from "@/lib/marketing/templates";
+import type { PostFormat } from "@/lib/marketing/formats";
+import type { Prisma } from "@prisma/client";
 
 export type BrandKitState = {
   ok: boolean;
@@ -74,4 +80,99 @@ export async function saveBrandKit(
 
   revalidatePath("/marketing/brand-kit");
   return { ok: true, message: "Kit de marca guardado." };
+}
+
+const createPostSchema = z.object({
+  businessId: z.string().min(1),
+  reviewId: z.string().optional().nullable(),
+  templateKey: z.string().refine(isTemplateKey, "Plantilla inválida."),
+  quoteText: z.string().trim().min(1, "El texto no puede estar vacío.").max(280),
+  starRating: z.coerce.number().int().min(1).max(5),
+  attribution: z.string().trim().max(80).optional().nullable(),
+  formats: z.array(z.enum(["SQUARE", "STORY"])).min(1),
+});
+
+export type CreatePostResult =
+  | { ok: true; postId: string }
+  | { ok: false; error: string };
+
+export async function createPost(raw: unknown): Promise<CreatePostResult> {
+  const parsed = createPostSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
+  }
+  const input = parsed.data;
+
+  let businessId: string;
+  try {
+    businessId = await assertBusiness(input.businessId);
+  } catch {
+    return { ok: false, error: "No tenés permisos para este negocio." };
+  }
+
+  const user = await requireUser();
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { name: true, logoUrl: true },
+  });
+  if (!business) return { ok: false, error: "Negocio no encontrado." };
+
+  const kitRow = await prisma.brandKit.findUnique({ where: { businessId } });
+  const kit = resolveBrandKit(kitRow, business.logoUrl);
+
+  // Fila primero (necesitamos el id para la clave de Blob), luego se rellenan URLs.
+  const post = await prisma.marketingPost.create({
+    data: {
+      businessId,
+      reviewId: input.reviewId ?? null,
+      templateKey: input.templateKey,
+      quoteText: input.quoteText,
+      starRating: input.starRating,
+      attribution: input.attribution ?? null,
+      createdById: user.id,
+    },
+  });
+
+  try {
+    const urls: Partial<Record<PostFormat, string>> = {};
+    for (const format of input.formats as PostFormat[]) {
+      const png = await renderPostPng({
+        templateKey: input.templateKey as Parameters<typeof renderPostPng>[0]["templateKey"],
+        format,
+        quote: input.quoteText,
+        rating: input.starRating,
+        attribution: input.attribution ?? null,
+        businessName: business.name,
+        kit,
+      });
+      urls[format] = await uploadPostImage(blobKey(businessId, post.id, format), png);
+    }
+    await prisma.marketingPost.update({
+      where: { id: post.id },
+      data: {
+        imageSquareUrl: urls.SQUARE ?? null,
+        imageStoryUrl: urls.STORY ?? null,
+      },
+    });
+  } catch {
+    // Limpieza: sin imágenes la fila no sirve.
+    await prisma.marketingPost.delete({ where: { id: post.id } }).catch(() => {});
+    return { ok: false, error: "No se pudo generar la imagen. Intentá de nuevo." };
+  }
+
+  revalidatePath("/marketing");
+  return { ok: true, postId: post.id };
+}
+
+export async function deletePost(postId: string): Promise<{ ok: boolean }> {
+  const user = await requireUser();
+  // Acota el borrado al alcance del rol vía relación business.
+  const post = await prisma.marketingPost.findFirst({
+    where: { id: postId, business: marketingBusinessWhere(user) as Prisma.BusinessWhereInput },
+    select: { id: true },
+  });
+  if (!post) return { ok: false };
+  await prisma.marketingPost.delete({ where: { id: post.id } });
+  revalidatePath("/marketing");
+  return { ok: true };
 }
