@@ -8,7 +8,7 @@ import { hashPassword } from "@/lib/password";
 import type { EntityFormState } from "./_components/CreateEntityForm";
 
 const schema = z.object({
-  agencyName: z.string().trim().min(1, "Ingresá el nombre de la agencia."),
+  agencyName: z.string().trim().min(1, "Ingresa el nombre de la agencia."),
   adminEmail: z.string().trim().email("Email inválido."),
   adminPassword: z.string().min(6, "Mínimo 6 caracteres."),
 });
@@ -30,7 +30,7 @@ export async function createAgency(
     const f = parsed.error.flatten().fieldErrors;
     return {
       ok: false,
-      error: "Revisá los campos marcados.",
+      error: "Revisa los campos marcados.",
       fieldErrors: {
         agencyName: f.agencyName?.[0] ?? "",
         adminEmail: f.adminEmail?.[0] ?? "",

@@ -9,8 +9,8 @@ import { slugify } from "@/lib/slug";
 import type { EntityFormState } from "../super/_components/CreateEntityForm";
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Ingresá el nombre del negocio."),
-  googleReviewUrl: z.string().trim().url("Ingresá una URL válida."),
+  name: z.string().trim().min(1, "Ingresa el nombre del negocio."),
+  googleReviewUrl: z.string().trim().url("Ingresa una URL válida."),
   adminEmail: z.string().trim().email("Email inválido."),
   adminPassword: z.string().min(6, "Mínimo 6 caracteres."),
 });
@@ -33,7 +33,7 @@ export async function createBusiness(
     const f = parsed.error.flatten().fieldErrors;
     return {
       ok: false,
-      error: "Revisá los campos marcados.",
+      error: "Revisa los campos marcados.",
       fieldErrors: {
         name: f.name?.[0] ?? "",
         googleReviewUrl: f.googleReviewUrl?.[0] ?? "",

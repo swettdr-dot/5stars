@@ -214,7 +214,7 @@ export function ReviewFlow({
               value={answers[q.id] ?? ""}
               onChange={(e) => !preview && setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
               rows={4}
-              placeholder="Escribí tu respuesta (opcional)…"
+              placeholder="Escribe tu respuesta (opcional)…"
               className="mt-5 w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
             />
             <button

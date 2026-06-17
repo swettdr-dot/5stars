@@ -19,8 +19,8 @@ const schema = z.object({
   googleReviewUrl: z
     .string()
     .trim()
-    .min(1, "Ingresá la URL de tu ficha de Google.")
-    .url("Ingresá una URL válida."),
+    .min(1, "Ingresa la URL de tu ficha de Google.")
+    .url("Ingresa una URL válida."),
   // Acepta vacío, una URL http(s), o una imagen subida como data URL (base64).
   logoUrl: z
     .string()
@@ -28,7 +28,7 @@ const schema = z.object({
     .optional()
     .refine(
       (v) => !v || /^https?:\/\//i.test(v) || /^data:image\//i.test(v),
-      "Subí una imagen o pegá una URL válida.",
+      "Sube una imagen o pega una URL válida.",
     )
     .refine((v) => !v || v.length <= 400_000, "La imagen es demasiado grande (máx ~250 KB)."),
   starThreshold: z.coerce
@@ -45,7 +45,7 @@ export async function updateSettings(
   const user = await requireUser();
   // Acotado al negocio de la sesión (tenancy): solo el BUSINESS_ADMIN de su negocio.
   if (user.role !== "BUSINESS_ADMIN" || !user.businessId) {
-    return { ok: false, error: "No tenés permisos para editar este negocio." };
+    return { ok: false, error: "No tienes permisos para editar este negocio." };
   }
 
   const parsed = schema.safeParse({
@@ -58,7 +58,7 @@ export async function updateSettings(
     const flat = parsed.error.flatten().fieldErrors;
     return {
       ok: false,
-      error: "Revisá los campos marcados.",
+      error: "Revisa los campos marcados.",
       fieldErrors: {
         googleReviewUrl: flat.googleReviewUrl?.[0],
         logoUrl: flat.logoUrl?.[0],

@@ -154,7 +154,7 @@ export function SettingsForm({
                 type="url"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="o pegá una URL (https://…)"
+                placeholder="o pega una URL (https://…)"
                 aria-label="URL del logo"
                 aria-invalid={Boolean(fieldErrors.logoUrl)}
                 className={`h-[38px] w-[280px] max-w-full rounded-control border bg-card px-3 font-mono text-meta text-ink outline-none focus:shadow-[0_0_0_3px_var(--ac-bg)] ${

@@ -56,6 +56,14 @@ export default async function BusinessReviews({
       contactPhone: true,
       createdAt: true,
       seller: { select: { name: true } },
+      answers: {
+        orderBy: { question: { order: "asc" } },
+        select: {
+          id: true,
+          value: true,
+          question: { select: { text: true } },
+        },
+      },
     },
   });
 
@@ -108,7 +116,7 @@ export default async function BusinessReviews({
             <EmptyState
               icon="chat"
               title="Aún no hay reseñas"
-              description="Compartí tu QR o enlace con tus clientes para empezar a recibir calificaciones."
+              description="Comparte tu QR o enlace con tus clientes para empezar a recibir calificaciones."
               action={
                 <Link
                   href="/business/qr"
@@ -152,6 +160,24 @@ export default async function BusinessReviews({
                   Vendedor: {r.seller?.name ?? "Sin vendedor"}
                   {contact && ` · Contacto: ${contact}`}
                 </div>
+                {r.answers.length > 0 && (
+                  <details className="group mt-2">
+                    <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[11.5px] font-semibold text-ink-2 transition-colors hover:text-accent">
+                      <span className="transition-transform group-open:rotate-90">›</span>
+                      Ver respuestas ({r.answers.length})
+                    </summary>
+                    <dl className="mt-2 space-y-2 border-l-2 border-line pl-3">
+                      {r.answers.map((a) => (
+                        <div key={a.id}>
+                          <dt className="text-[11.5px] font-semibold text-ink-2">{a.question.text}</dt>
+                          <dd className="text-body leading-relaxed text-ink">
+                            {a.value.trim() || <span className="text-ink-3">Sin respuesta</span>}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </details>
+                )}
                 {r.comment?.trim() && (
                   <Link
                     href={`/marketing/new?reviewId=${r.id}`}

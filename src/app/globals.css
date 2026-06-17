@@ -59,7 +59,7 @@
   --topbar-h: 60px;
   --control-h: 42px;
 
-  /* Escala global del panel (≈ "zoom" del navegador). Ajustar acá afecta todo
+  /* Escala global del panel (≈ "zoom" del navegador). Ajustar aquí afecta todo
      el panel de forma uniforme. El flujo público (mobile-first) no se escala. */
   --panel-zoom: 0.9;
 }

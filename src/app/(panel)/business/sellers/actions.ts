@@ -27,7 +27,7 @@ const schema = z
   })
   // El login del vendedor es opcional, pero si se quiere, email y contraseña van juntos.
   .refine((d) => !!d.email === !!d.password, {
-    message: "Para habilitar login, completá email y contraseña.",
+    message: "Para habilitar login, completa email y contraseña.",
     path: ["password"],
   });
 
