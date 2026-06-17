@@ -41,6 +41,7 @@ export default async function AgencyOverview({
       include: { _count: { select: { sellers: true, reviews: true } } },
       orderBy: { createdAt: "desc" },
     }),
+    // "Negocios nuevos este mes": conteo fijo de 30 días (no sigue el filtro de rango).
     prisma.business.count({ where: { agencyId, createdAt: { gte: monthStart } } }),
     // Historial de la agencia para KPIs, distribución y tendencia. TODO: precalcular
     // agregados para grandes volúmenes.
@@ -157,7 +158,7 @@ export default async function AgencyOverview({
         title="Resumen de la agencia"
         subtitle={`${scopeLabel} · ${win.label}.`}
         actions={
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="h-[34px] w-[300px] animate-pulse rounded-[8px] bg-line" />}>
             <BusinessFilterBar
               businesses={businesses.map((b) => ({ id: b.id, name: b.name }))}
               business={businessId}
