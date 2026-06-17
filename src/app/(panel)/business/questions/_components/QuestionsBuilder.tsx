@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { ReviewFlow, type FlowQuestion } from "@/app/r/_components/ReviewFlow";
-import { createQuestion, deleteQuestion, reorderQuestions, toggleQuestion } from "../actions";
+import { createQuestion, updateQuestion, deleteQuestion, reorderQuestions, toggleQuestion } from "../actions";
 
 type Q = {
   id: string;
@@ -62,6 +62,18 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
     setSeenAdd(addState);
     if (addState.ok) setShowAdd(false);
   }
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editType, setEditType] = useState<"MULTIPLE_CHOICE" | "TEXT">("MULTIPLE_CHOICE");
+  const [editState, editAction, editPending] = useActionState(updateQuestion, { ok: false });
+  // Cierra el form al guardar con éxito; recuerda a qué pregunta pertenece un error
+  // para no mostrarlo al abrir la edición de otra (patrón "estado previo").
+  const [seenEdit, setSeenEdit] = useState(editState);
+  const [errorForId, setErrorForId] = useState<string | null>(null);
+  if (seenEdit !== editState) {
+    setSeenEdit(editState);
+    if (editState.ok) setEditingId(null);
+    else setErrorForId(editState.error ? editingId : null);
+  }
   const setPreviewStep = (n: number) => setPreviewStepRaw(Math.min(Math.max(n, 0), ratingStep));
   const step = Math.min(previewStep, ratingStep);
 
@@ -73,6 +85,63 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
           {items.map((q, i) => {
             const idx = activeIndexById.get(q.id);
             const selected = q.active && idx === step;
+            if (editingId === q.id) {
+              return (
+                <form
+                  key={q.id}
+                  action={editAction}
+                  className="flex flex-col gap-2.5 rounded-[12px] border-[1.5px] border-accent bg-card p-[15px]"
+                >
+                  <input type="hidden" name="id" value={q.id} />
+                  <input
+                    name="text"
+                    required
+                    defaultValue={q.text}
+                    placeholder="Texto de la pregunta"
+                    className="h-10 rounded-control border border-line bg-card px-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
+                  />
+                  <select
+                    name="type"
+                    value={editType}
+                    onChange={(e) => setEditType(e.target.value as "MULTIPLE_CHOICE" | "TEXT")}
+                    className="h-10 rounded-control border border-line bg-card px-3 text-body text-ink outline-none focus:border-accent"
+                  >
+                    <option value="MULTIPLE_CHOICE">Opción múltiple</option>
+                    <option value="TEXT">Texto abierto</option>
+                  </select>
+                  {editType === "MULTIPLE_CHOICE" && (
+                    <textarea
+                      name="options"
+                      rows={4}
+                      defaultValue={q.options.join("\n")}
+                      placeholder={"Una opción por línea\nEj:\nExcelente\nBuena\nRegular\nMala"}
+                      className="resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
+                    />
+                  )}
+                  {editState.error && errorForId === q.id && (
+                    <p role="alert" className="text-meta text-red">
+                      {editState.error}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={editPending}
+                      className="rounded-control bg-accent px-4 py-2 text-[13px] font-semibold text-white hover:bg-accent-dark disabled:opacity-70"
+                    >
+                      {editPending ? "Guardando…" : "Guardar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="rounded-control px-4 py-2 text-[13px] font-semibold text-ink-2 hover:bg-accent-weak"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              );
+            }
             return (
               <div
                 key={q.id}
@@ -88,7 +157,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   selected ? "border-accent bg-accent-weak" : "border-line bg-card hover:border-[#dcdce3]"
                 }`}
               >
-                <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastrá para reordenar">
+                <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastra para reordenar">
                   ⋮⋮
                 </span>
                 <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-accent-bg text-meta font-semibold text-accent-dark">
@@ -111,6 +180,21 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    aria-label="Editar"
+                    onClick={() => {
+                      setShowAdd(false);
+                      setEditType(q.type);
+                      setEditingId(q.id);
+                    }}
+                    className="flex size-6 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-accent-weak hover:text-accent"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
                   <form action={deleteQuestion}>
                     <input type="hidden" name="id" value={q.id} />
                     <button
@@ -198,6 +282,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
             <button
               type="button"
               onClick={() => {
+                setEditingId(null);
                 setNewType("MULTIPLE_CHOICE");
                 setShowAdd(true);
               }}
