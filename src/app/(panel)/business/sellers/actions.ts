@@ -38,8 +38,13 @@ export async function createSeller(
   const businessId = String(formData.get("businessId"));
   try {
     await resolveManageableBusiness(businessId);
-  } catch {
-    return { ok: false, error: "No autorizado." };
+  } catch (e) {
+    // Solo la denegación por tenancy se reporta como "no autorizado"; otros
+    // errores (p. ej. fallo de BD) se propagan en vez de enmascararse.
+    if (e instanceof Error && e.message === "FORBIDDEN") {
+      return { ok: false, error: "No autorizado." };
+    }
+    throw e;
   }
 
   const parsed = schema.safeParse({

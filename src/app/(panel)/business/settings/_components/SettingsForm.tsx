@@ -88,7 +88,7 @@ export function SettingsForm({
           Calificaciones de <b className="font-semibold text-ink">{threshold}★ o más</b> se
           redirigen a Google. Menores se capturan en privado.
         </p>
-        <SettingsSegmented name="starThreshold" value={threshold} onChange={canEdit ? setThreshold : () => {}} />
+        <SettingsSegmented name="starThreshold" value={threshold} onChange={setThreshold} disabled={!canEdit} />
         {fieldErrors.starThreshold && (
           <p className="mt-2 text-meta text-red">{fieldErrors.starThreshold}</p>
         )}
