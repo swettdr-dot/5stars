@@ -14,8 +14,6 @@ export type ResolvedRange = {
   label: string;
 };
 
-const DAY_MS = 86_400_000;
-
 function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
@@ -67,7 +65,8 @@ export function resolveDateRange(
     const today = startOfDay(now);
     // getDay(): 0=domingo..6=sábado. Convertir a 0=lunes..6=domingo.
     const dow = (today.getDay() + 6) % 7;
-    const start = new Date(today.getTime() - dow * DAY_MS);
+    // Constructor (no aritmética en ms) para no desfasar una hora en cambios de horario.
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow);
     return withPrev("week", start, now, "esta semana");
   }
 
