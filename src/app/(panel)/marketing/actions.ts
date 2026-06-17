@@ -43,7 +43,7 @@ export async function saveBrandKit(
     const { business } = await assertBusiness(String(formData.get("businessId") ?? ""));
     businessId = business.id;
   } catch {
-    return { ok: false, error: "No tenés permisos para este negocio." };
+    return { ok: false, error: "No tienes permisos para este negocio." };
   }
 
   const parsed = brandKitSchema.safeParse({
@@ -59,7 +59,7 @@ export async function saveBrandKit(
     logoOverrideUrl: (formData.get("logoOverrideUrl") as string) || null,
   });
   if (!parsed.success) {
-    return { ok: false, error: "Revisá los colores y campos del kit." };
+    return { ok: false, error: "Revisa los colores y campos del kit." };
   }
   const d = parsed.data;
 
@@ -112,7 +112,7 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
   try {
     ({ user, business } = await assertBusiness(input.businessId));
   } catch {
-    return { ok: false, error: "No tenés permisos para este negocio." };
+    return { ok: false, error: "No tienes permisos para este negocio." };
   }
   const businessId = business.id;
 
@@ -157,7 +157,7 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
     // Limpieza: sin imágenes la fila no sirve; borrar fila y blobs ya subidos.
     await prisma.marketingPost.delete({ where: { id: post.id } }).catch(() => {});
     await deletePostImages(Object.values(urls)).catch(() => {});
-    return { ok: false, error: "No se pudo generar la imagen. Intentá de nuevo." };
+    return { ok: false, error: "No se pudo generar la imagen. Inténtalo de nuevo." };
   }
 
   revalidatePath("/marketing");

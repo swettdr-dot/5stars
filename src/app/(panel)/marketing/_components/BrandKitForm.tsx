@@ -88,7 +88,7 @@ export function BrandKitForm({
 
       <Card padding="p-5">
         <label className="mb-2 block text-card-title font-semibold text-ink">Logo (opcional)</label>
-        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Pegá una URL para sobrescribirlo.</p>
+        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Pega una URL para sobrescribirlo.</p>
         <input
           type="url"
           name="logoOverrideUrl"

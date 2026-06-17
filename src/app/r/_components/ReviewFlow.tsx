@@ -89,13 +89,13 @@ export function ReviewFlow({
   if (!preview && terminal === "capture") {
     body = (
       <div className="flex flex-1 flex-col">
-        <h2 className="text-[19px] font-semibold tracking-tight text-ink">¡Gracias! ¿Nos dejás tu reseña?</h2>
+        <h2 className="text-[19px] font-semibold tracking-tight text-ink">¡Gracias! ¿Nos dejas tu reseña?</h2>
         <p className="mt-1 text-meta text-ink-2">La copiamos para que solo la pegues en Google.</p>
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={4}
-          placeholder="Contanos tu experiencia…"
+          placeholder="Cuéntanos tu experiencia…"
           className="mt-4 w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
         />
         <input
