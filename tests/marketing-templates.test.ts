@@ -8,7 +8,7 @@ import { TEMPLATES, TEMPLATE_LIST } from "@/lib/marketing/templates";
 const KIT: BrandKitValues = {
   primary: "#112233", accent: "#445566", background: "#FFFFFF", text: "#000000",
   colors: [], headingFont: "Playfair Display", bodyFont: "Inter",
-  backgrounds: [], toneOfVoice: null, logoUrl: null,
+  backgrounds: [], toneOfVoice: null, logoOverrideUrl: null, logoUrl: null,
 };
 
 function collect(node: unknown, texts: string[], colors: string[]): void {

@@ -15,6 +15,9 @@ export type BrandKitValues = {
   bodyFont: string;
   backgrounds: string[];
   toneOfVoice: string | null;
+  /** Override explícito guardado por el usuario (para editar el formulario). */
+  logoOverrideUrl: string | null;
+  /** Logo efectivo a renderizar: override del kit o, si no, el del negocio. */
   logoUrl: string | null;
 };
 
@@ -49,6 +52,7 @@ export function resolveBrandKit(
     bodyFont: k.bodyFont,
     backgrounds: k.backgrounds ?? [],
     toneOfVoice: k.toneOfVoice ?? null,
+    logoOverrideUrl: k.logoOverrideUrl ?? null,
     logoUrl: k.logoOverrideUrl || businessLogoUrl || null,
   };
 }

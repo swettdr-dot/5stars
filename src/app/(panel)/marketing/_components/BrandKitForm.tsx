@@ -92,7 +92,7 @@ export function BrandKitForm({
         <input
           type="url"
           name="logoOverrideUrl"
-          defaultValue={values.logoUrl ?? ""}
+          defaultValue={values.logoOverrideUrl ?? ""}
           placeholder="https://…"
           className="h-10 w-full rounded-control border border-line bg-card px-3 font-mono text-meta text-ink outline-none focus:border-accent"
         />
