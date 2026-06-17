@@ -1,8 +1,8 @@
 "use server";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
+import { parseQuestionInput } from "@/lib/question-input";
 
 async function ownBusinessId() {
   const user = await requireUser();
@@ -13,37 +13,26 @@ async function ownBusinessId() {
 /** Estado devuelto a la UI (useActionState) para feedback/validación. */
 export type QuestionFormState = { ok: boolean; error?: string };
 
-const createSchema = z.object({
-  text: z.string().trim().min(1, "Escribe el texto de la pregunta."),
-  type: z.enum(["TEXT", "MULTIPLE_CHOICE"]),
-  // En "Texto abierto" el campo no se renderiza → FormData.get devuelve null.
-  options: z.string().nullish(),
-});
-
 export async function createQuestion(
   _prev: QuestionFormState,
   formData: FormData,
 ): Promise<QuestionFormState> {
   const businessId = await ownBusinessId();
-  const parsed = createSchema.safeParse({
+  const parsed = parseQuestionInput({
     text: formData.get("text"),
     type: formData.get("type"),
     options: formData.get("options"),
   });
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Revisá los datos." };
-  }
-  const data = parsed.data;
-  const options =
-    data.type === "MULTIPLE_CHOICE" && data.options
-      ? data.options.split(/\r?\n/).map((o) => o.trim()).filter(Boolean)
-      : [];
-  if (data.type === "MULTIPLE_CHOICE" && options.length === 0) {
-    return { ok: false, error: "Agrega al menos una opción (una por línea)." };
-  }
+  if (!parsed.ok) return { ok: false, error: parsed.error };
   const count = await prisma.question.count({ where: { businessId } });
   await prisma.question.create({
-    data: { businessId, text: data.text, type: data.type, options, order: count },
+    data: {
+      businessId,
+      text: parsed.data.text,
+      type: parsed.data.type,
+      options: parsed.data.options,
+      order: count,
+    },
   });
   revalidatePath("/business/questions");
   return { ok: true };
