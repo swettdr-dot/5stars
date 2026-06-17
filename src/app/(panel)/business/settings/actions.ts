@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { resolveManageableBusiness } from "@/lib/business-access";
 
 /** Estado devuelto a la UI (useActionState) para mostrar feedback/validación. */
 export type SettingsState = {
@@ -42,9 +42,10 @@ export async function updateSettings(
   _prev: SettingsState,
   formData: FormData,
 ): Promise<SettingsState> {
-  const user = await requireUser();
-  // Acotado al negocio de la sesión (tenancy): solo el BUSINESS_ADMIN de su negocio.
-  if (user.role !== "BUSINESS_ADMIN" || !user.businessId) {
+  const businessId = String(formData.get("businessId"));
+  try {
+    await resolveManageableBusiness(businessId);
+  } catch {
     return { ok: false, error: "No tienes permisos para editar este negocio." };
   }
 
@@ -69,7 +70,7 @@ export async function updateSettings(
 
   const data = parsed.data;
   await prisma.business.update({
-    where: { id: user.businessId },
+    where: { id: businessId },
     data: {
       googleReviewUrl: data.googleReviewUrl,
       logoUrl: data.logoUrl ? data.logoUrl : null,
@@ -77,6 +78,7 @@ export async function updateSettings(
     },
   });
 
+  revalidatePath(`/agency/${businessId}/settings`);
   revalidatePath("/business/settings");
   return { ok: true, message: "Cambios guardados." };
 }
