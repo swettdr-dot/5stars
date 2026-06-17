@@ -16,3 +16,21 @@ export function businessWhereForSession(u: SessionUser): Record<string, unknown>
       return { id: u.businessId ?? "__none__" };
   }
 }
+
+/** Roles que pueden editar la configuración (preguntas/vendedores/ajustes) de un negocio. */
+export function canManageBusinessConfig(role: SessionUser["role"]): boolean {
+  return role === "SUPER_ADMIN" || role === "AGENCY_ADMIN";
+}
+
+/**
+ * `where` para localizar un negocio que la sesión puede EDITAR, o `null` si su rol
+ * no gestiona configuración. Combina el negocio pedido con el alcance del rol, así
+ * una agencia solo alcanza negocios de su agencia (super, cualquiera).
+ */
+export function manageableBusinessWhere(
+  u: SessionUser,
+  businessId: string,
+): Record<string, unknown> | null {
+  if (!canManageBusinessConfig(u.role)) return null;
+  return { id: businessId, ...businessWhereForSession(u) };
+}

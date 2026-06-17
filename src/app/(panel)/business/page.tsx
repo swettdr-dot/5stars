@@ -188,7 +188,7 @@ export default async function BusinessOverview({
             <EmptyState
               icon="chat"
               title="Aún no hay reseñas"
-              description="Compartí tu QR o enlace con tus clientes para empezar a recibir calificaciones."
+              description="Comparte tu QR o enlace con tus clientes para empezar a recibir calificaciones."
               action={
                 <Link
                   href="/business/qr"

@@ -60,7 +60,7 @@ export function resolveBrandKit(
 const hex = z
   .string()
   .trim()
-  .regex(/^#([0-9a-fA-F]{6})$/, "Usá un color hex tipo #1A2B3C.");
+  .regex(/^#([0-9a-fA-F]{6})$/, "Usa un color hex tipo #1A2B3C.");
 
 const fontOption = z.enum(FONT_OPTIONS);
 

@@ -188,7 +188,7 @@ export default async function SuperOverview() {
           col2Label="Negocios"
           activeLabel="Activa"
           rows={rows}
-          emptyHint="Aún no hay agencias. Creá la primera con “+ Nueva agencia”."
+          emptyHint="Aún no hay agencias. Crea la primera con “+ Nueva agencia”."
         />
       </section>
     </div>

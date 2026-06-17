@@ -22,7 +22,6 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/business/questions", label: "Preguntas", icon: "list" },
     { href: "/business/sellers", label: "Vendedores", icon: "users" },
     { href: "/business/qr", label: "Mi QR / Enlace", icon: "qr" },
-    { href: "/marketing", label: "Marketing", icon: "image" },
     { href: "/business/settings", label: "Ajustes", icon: "gear" },
   ],
   SELLER: [{ href: "/seller", label: "Mi panel", icon: "chart" }],

@@ -357,7 +357,7 @@ export function resolveBrandKit(
 const hex = z
   .string()
   .trim()
-  .regex(/^#([0-9a-fA-F]{6})$/, "Usá un color hex tipo #1A2B3C.");
+  .regex(/^#([0-9a-fA-F]{6})$/, "Usa un color hex tipo #1A2B3C.");
 
 const fontOption = z.enum(FONT_OPTIONS);
 
@@ -366,7 +366,7 @@ const dataOrHttpUrl = z
   .trim()
   .refine(
     (v) => /^https?:\/\//i.test(v) || /^data:image\//i.test(v),
-    "Subí una imagen o pegá una URL válida.",
+    "Sube una imagen o pega una URL válida.",
   );
 
 export const brandKitSchema = z.object({
@@ -1143,7 +1143,7 @@ export async function saveBrandKit(
   try {
     businessId = await assertBusiness(String(formData.get("businessId") ?? ""));
   } catch {
-    return { ok: false, error: "No tenés permisos para este negocio." };
+    return { ok: false, error: "No tienes permisos para este negocio." };
   }
 
   const parsed = brandKitSchema.safeParse({
@@ -1159,7 +1159,7 @@ export async function saveBrandKit(
     logoOverrideUrl: (formData.get("logoOverrideUrl") as string) || null,
   });
   if (!parsed.success) {
-    return { ok: false, error: "Revisá los colores y campos del kit." };
+    return { ok: false, error: "Revisa los colores y campos del kit." };
   }
   const d = parsed.data;
 
@@ -1269,7 +1269,7 @@ export function BrandKitForm({
 
       <Card padding="p-5">
         <label className="mb-2 block text-card-title font-semibold text-ink">Logo (opcional)</label>
-        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Pegá una URL para sobrescribirlo.</p>
+        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Pega una URL para sobrescribirlo.</p>
         <input
           type="url"
           name="logoOverrideUrl"
@@ -1396,7 +1396,7 @@ En el bloque de `body`, agregar una rama **antes** de `else if (!preview && term
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={4}
-          placeholder="Contanos tu experiencia…"
+          placeholder="Cuéntanos tu experiencia…"
           className="mt-4 w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
         />
         <input
@@ -1572,7 +1572,7 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
   try {
     businessId = await assertBusiness(input.businessId);
   } catch {
-    return { ok: false, error: "No tenés permisos para este negocio." };
+    return { ok: false, error: "No tienes permisos para este negocio." };
   }
 
   const user = await requireUser();
@@ -1856,7 +1856,7 @@ export default async function NewPostPage({
 
   return (
     <div>
-      <PageHeader title="Crear publicación" subtitle="Elegí plantilla, ajustá el texto y generá la imagen." />
+      <PageHeader title="Crear publicación" subtitle="Elige plantilla, ajusta el texto y genera la imagen." />
       <PostEditor
         businessId={ctx.business.id}
         initial={{ reviewId, quoteText, starRating, attribution }}
@@ -1914,7 +1914,7 @@ export function Gallery({ items, businessId }: { items: GalleryItem[]; businessI
         <p className="text-center text-body text-ink-2">
           Aún no hay publicaciones.{" "}
           <Link href={`/marketing/new?businessId=${businessId}`} className="font-semibold text-accent">
-            Creá la primera
+            Crea la primera
           </Link>
           .
         </p>
@@ -2128,7 +2128,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export function buildImprovePrompt(original: string, toneOfVoice: string | null): string {
   const tono = toneOfVoice ? `Tono de voz de la marca: ${toneOfVoice}.` : "";
   return [
-    "Sos un editor de marketing. Reescribí la siguiente reseña de un cliente para",
+    "Eres un editor de marketing. Reescribe la siguiente reseña de un cliente para",
     "usarla como cita en una publicación, en español, breve (máx 200 caracteres),",
     "conservando el sentido y sin inventar hechos. Devolvé SOLO el texto, sin comillas.",
     tono,

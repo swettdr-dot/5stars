@@ -22,9 +22,9 @@ con las DevTools.
 
 ## Fidelidad
 **Alta fidelidad (hi-fi).** Colores, tipografía, espaciados e interacciones son finales.
-Recreá la UI lo más fiel posible con tus librerías y convenciones. Los **gráficos** están hechos a
-mano (divs, `conic-gradient`, SVG inline) sólo para el prototipo — en producción usá una librería real
-(p. ej. Recharts o Tremor); respetá el aspecto, no la implementación. Los **datos son mock
+Recrea la UI lo más fiel posible con tus librerías y convenciones. Los **gráficos** están hechos a
+mano (divs, `conic-gradient`, SVG inline) sólo para el prototipo — en producción usa una librería real
+(p. ej. Recharts o Tremor); respeta el aspecto, no la implementación. Los **datos son mock
 hardcodeados**; hay que cablearlos a tu API/Prisma.
 
 ---
@@ -223,4 +223,4 @@ y el flujo público a una ruta dinámica por slug de negocio/vendedor sin auth.
 
 ## Archivos
 - `5stars.dc.html` — prototipo completo (shell + 4 roles + flujo público). Toda la lógica de
-  interacción y los valores de diseño están acá.
+  interacción y los valores de diseño están aquí.

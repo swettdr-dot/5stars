@@ -33,7 +33,7 @@ export function SellersTable({ rows }: { rows: SellerRow[] }) {
       <Card className="text-center" padding="p-12">
         <p className="text-body font-semibold text-ink">Aún no hay vendedores</p>
         <p className="mt-1 text-meta text-ink-3">
-          Creá tu primer vendedor para darle un link/QR propio y atribuir sus reseñas.
+          Crea tu primer vendedor para darle un link/QR propio y atribuir sus reseñas.
         </p>
       </Card>
     );

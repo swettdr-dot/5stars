@@ -23,7 +23,8 @@ async function assertBusiness(
   businessId: string,
 ): Promise<{ user: AppUser; business: { id: string; name: string; logoUrl: string | null } }> {
   const user = await requireUser();
-  if (user.role !== "BUSINESS_ADMIN" && user.role !== "AGENCY_ADMIN") {
+  // Marketing es solo de la agencia; SUPER_ADMIN lo alcanza impersonando.
+  if (user.role !== "AGENCY_ADMIN") {
     throw new Error("FORBIDDEN");
   }
   const business = await prisma.business.findFirst({
@@ -166,6 +167,8 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
 
 export async function deletePost(postId: string): Promise<{ ok: boolean }> {
   const user = await requireUser();
+  // Marketing es solo de la agencia; el negocio ya no opera marketing.
+  if (user.role !== "AGENCY_ADMIN") return { ok: false };
   // Acota el borrado al alcance del rol vía relación business.
   const post = await prisma.marketingPost.findFirst({
     where: { id: postId, business: marketingBusinessWhere(user) as Prisma.BusinessWhereInput },

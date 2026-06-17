@@ -14,8 +14,12 @@ function stripScheme(url: string): string {
 
 export function SettingsForm({
   defaults,
+  businessId,
+  canEdit,
 }: {
   defaults: { googleReviewUrl: string; logoUrl: string; starThreshold: number };
+  businessId: string;
+  canEdit: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(updateSettings, initialState);
 
@@ -57,6 +61,7 @@ export function SettingsForm({
 
   return (
     <form action={formAction} className="space-y-[14px]">
+      <input type="hidden" name="businessId" value={businessId} />
       {/* Banner de resultado */}
       {state.ok && state.message && (
         <div
@@ -83,7 +88,7 @@ export function SettingsForm({
           Calificaciones de <b className="font-semibold text-ink">{threshold}★ o más</b> se
           redirigen a Google. Menores se capturan en privado.
         </p>
-        <SettingsSegmented name="starThreshold" value={threshold} onChange={setThreshold} />
+        <SettingsSegmented name="starThreshold" value={threshold} onChange={setThreshold} disabled={!canEdit} />
         {fieldErrors.starThreshold && (
           <p className="mt-2 text-meta text-red">{fieldErrors.starThreshold}</p>
         )}
@@ -112,6 +117,7 @@ export function SettingsForm({
             value={googleRest}
             onChange={(e) => setGoogleRest(stripScheme(e.target.value))}
             placeholder="g.page/tu-negocio/review"
+            disabled={!canEdit}
             aria-invalid={Boolean(fieldErrors.googleReviewUrl)}
             aria-describedby="googleReviewUrlHelp"
             className="h-full flex-1 border-none bg-transparent px-3 font-mono text-body text-ink outline-none"
@@ -136,7 +142,7 @@ export function SettingsForm({
           <div className="flex flex-col gap-2">
             <label className="inline-flex h-[38px] w-fit cursor-pointer items-center rounded-control border border-line bg-card px-[15px] text-body font-semibold text-ink-2 transition-colors hover:border-accent hover:text-accent">
               Subir logo
-              <input type="file" accept="image/*" onChange={onPickFile} className="hidden" />
+              <input type="file" accept="image/*" onChange={onPickFile} disabled={!canEdit} className="hidden" />
             </label>
             {logoUrl.startsWith("data:") ? (
               <button
@@ -154,7 +160,8 @@ export function SettingsForm({
                 type="url"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="o pegá una URL (https://…)"
+                placeholder="o pega una URL (https://…)"
+                disabled={!canEdit}
                 aria-label="URL del logo"
                 aria-invalid={Boolean(fieldErrors.logoUrl)}
                 className={`h-[38px] w-[280px] max-w-full rounded-control border bg-card px-3 font-mono text-meta text-ink outline-none focus:shadow-[0_0_0_3px_var(--ac-bg)] ${
@@ -173,6 +180,7 @@ export function SettingsForm({
       </Card>
 
       {/* Footer */}
+      {canEdit && (
       <div className="flex justify-end gap-[10px] pt-1">
         <button
           type="button"
@@ -190,6 +198,7 @@ export function SettingsForm({
           {isPending ? "Guardando…" : "Guardar cambios"}
         </button>
       </div>
+      )}
     </form>
   );
 }
