@@ -4,7 +4,7 @@ import { qrDataUrl } from "@/lib/qr";
 import { getBaseUrl } from "@/lib/base-url";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
-import { CopyButton } from "./_components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 export default async function QrPage() {
   const user = await requireUser();

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-/** Botón "Copiar" que copia el enlace del vendedor al portapapeles. */
+/** Botón "Copiar" que copia un valor al portapapeles. */
 export function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
