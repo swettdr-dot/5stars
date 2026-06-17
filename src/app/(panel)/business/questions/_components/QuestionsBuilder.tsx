@@ -19,7 +19,17 @@ function typeLabel(t: Q["type"]): string {
   return t === "MULTIPLE_CHOICE" ? "Opción múltiple" : "Texto abierto · opcional";
 }
 
-export function QuestionsBuilder({ business, questions }: { business: Business; questions: Q[] }) {
+export function QuestionsBuilder({
+  business,
+  questions,
+  businessId,
+  canEdit,
+}: {
+  business: Business;
+  questions: Q[];
+  businessId: string;
+  canEdit: boolean;
+}) {
   // Orden local (optimista para drag&drop); se resincroniza cuando el server revalida.
   const [items, setItems] = useState(questions);
   const [seenQ, setSeenQ] = useState(questions);
@@ -49,7 +59,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
     next.splice(target, 0, moved);
     setItems(next);
     setDragIndex(null);
-    void reorderQuestions(next.map((q) => q.id));
+    void reorderQuestions(businessId, next.map((q) => q.id));
   }
 
   const [previewStep, setPreviewStepRaw] = useState(0);
@@ -93,6 +103,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   className="flex flex-col gap-2.5 rounded-[12px] border-[1.5px] border-accent bg-card p-[15px]"
                 >
                   <input type="hidden" name="id" value={q.id} />
+                  <input type="hidden" name="businessId" value={businessId} />
                   <input
                     name="text"
                     required
@@ -145,10 +156,10 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
             return (
               <div
                 key={q.id}
-                draggable
-                onDragStart={() => setDragIndex(i)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(i)}
+                draggable={canEdit}
+                onDragStart={() => canEdit && setDragIndex(i)}
+                onDragOver={(e) => canEdit && e.preventDefault()}
+                onDrop={() => canEdit && handleDrop(i)}
                 onDragEnd={() => setDragIndex(null)}
                 onClick={() => q.active && idx != null && setPreviewStep(idx)}
                 className={`flex items-start gap-3 rounded-[12px] border-[1.5px] p-[15px] transition-colors ${
@@ -157,9 +168,11 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   selected ? "border-accent bg-accent-weak" : "border-line bg-card hover:border-[#dcdce3]"
                 }`}
               >
-                <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastra para reordenar">
-                  ⋮⋮
-                </span>
+                {canEdit && (
+                  <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastra para reordenar">
+                    ⋮⋮
+                  </span>
+                )}
                 <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-accent-bg text-meta font-semibold text-accent-dark">
                   {idx != null ? idx + 1 : "—"}
                 </span>
@@ -179,6 +192,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                     </div>
                   )}
                 </div>
+                {canEdit && (
                 <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <button
                     type="button"
@@ -197,6 +211,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   </button>
                   <form action={deleteQuestion}>
                     <input type="hidden" name="id" value={q.id} />
+                    <input type="hidden" name="businessId" value={businessId} />
                     <button
                       type="submit"
                       aria-label="Eliminar"
@@ -209,6 +224,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   </form>
                   <form action={toggleQuestion}>
                     <input type="hidden" name="id" value={q.id} />
+                    <input type="hidden" name="businessId" value={businessId} />
                     <button
                       type="submit"
                       role="switch"
@@ -224,15 +240,17 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                     </button>
                   </form>
                 </div>
+                )}
               </div>
             );
           })}
 
-          {showAdd ? (
+          {canEdit && (showAdd ? (
             <form
               action={addAction}
               className="flex flex-col gap-2.5 rounded-[12px] border-[1.5px] border-accent bg-card p-[15px]"
             >
+              <input type="hidden" name="businessId" value={businessId} />
               <input
                 name="text"
                 required
@@ -290,7 +308,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
             >
               + Agregar pregunta
             </button>
-          )}
+          ))}
         </div>
 
         {/* Nota del paso final (clickable → preview del selector de estrellas) */}
