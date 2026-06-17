@@ -1,9 +1,10 @@
+import type { ReactElement } from "react";
 import type { TemplateProps } from "./types";
 import { starString } from "./types";
 import { FORMAT_DIMS } from "@/lib/marketing/formats";
 
 /** Plantilla editorial: fondo de marca, cita grande con serif, estrellas y firma. */
-export function elegante(p: TemplateProps): React.ReactElement {
+export function elegante(p: TemplateProps): ReactElement {
   const { width, height } = FORMAT_DIMS[p.format];
   const pad = Math.round(width * 0.1);
   return (

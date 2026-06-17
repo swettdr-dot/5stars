@@ -77,7 +77,7 @@ export const brandKitSchema = z.object({
   headingFont: fontOption,
   bodyFont: fontOption,
   backgrounds: z.array(dataOrHttpUrl).max(5).optional().default([]),
-  toneOfVoice: z.string().trim().max(280).optional().nullable(),
+  toneOfVoice: z.string().trim().max(280).optional().nullable().default(null),
   logoOverrideUrl: dataOrHttpUrl.optional().nullable(),
 });
 

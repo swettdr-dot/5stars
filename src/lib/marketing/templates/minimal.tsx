@@ -1,9 +1,10 @@
+import type { ReactElement } from "react";
 import type { TemplateProps } from "./types";
 import { starString } from "./types";
 import { FORMAT_DIMS } from "@/lib/marketing/formats";
 
 /** Plantilla limpia: barra de acento, cita centrada sans-serif y firma discreta. */
-export function minimal(p: TemplateProps): React.ReactElement {
+export function minimal(p: TemplateProps): ReactElement {
   const { width, height } = FORMAT_DIMS[p.format];
   const pad = Math.round(width * 0.11);
   return (
