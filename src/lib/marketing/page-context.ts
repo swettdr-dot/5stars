@@ -17,16 +17,14 @@ export async function getMarketingContext(
   requestedBusinessId?: string,
 ): Promise<MarketingContext | null> {
   const user = await requireUser();
-  if (user.role !== "BUSINESS_ADMIN" && user.role !== "AGENCY_ADMIN") return null;
+  // Marketing es solo de la agencia; SUPER_ADMIN lo alcanza impersonando.
+  if (user.role !== "AGENCY_ADMIN") return null;
 
-  const options =
-    user.role === "AGENCY_ADMIN"
-      ? await prisma.business.findMany({
-          where: marketingBusinessWhere(user),
-          orderBy: { createdAt: "asc" },
-          select: { id: true, name: true },
-        })
-      : [];
+  const options = await prisma.business.findMany({
+    where: marketingBusinessWhere(user),
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true },
+  });
 
   const business = await prisma.business.findFirst({
     where: marketingBusinessWhere(user, requestedBusinessId),
