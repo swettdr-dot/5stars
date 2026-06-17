@@ -44,7 +44,7 @@ export function ReviewFlow({
   const [comment, setComment] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [terminal, setTerminal] = useState<null | "high" | "low" | "thanks">(null);
+  const [terminal, setTerminal] = useState<null | "capture" | "high" | "low" | "thanks">(null);
   const [googleUrl, setGoogleUrl] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -78,7 +78,7 @@ export function ReviewFlow({
 
   function sendRating() {
     if (preview || stars === 0) return;
-    if (stars >= starThreshold) submit({}, "high");
+    if (stars >= starThreshold) setTerminal("capture");
     else setTerminal("low");
   }
 
@@ -86,7 +86,50 @@ export function ReviewFlow({
   let body: React.ReactNode;
   const q = curStep < questions.length ? questions[curStep] : null;
 
-  if (!preview && terminal === "high") {
+  if (!preview && terminal === "capture") {
+    body = (
+      <div className="flex flex-1 flex-col">
+        <h2 className="text-[19px] font-semibold tracking-tight text-ink">¡Gracias! ¿Nos dejás tu reseña?</h2>
+        <p className="mt-1 text-meta text-ink-2">La copiamos para que solo la pegues en Google.</p>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={4}
+          placeholder="Contanos tu experiencia…"
+          className="mt-4 w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
+        />
+        <input
+          value={contactName}
+          onChange={(e) => setContactName(e.target.value)}
+          placeholder="Tu nombre (opcional)"
+          className="mt-2.5 h-11 w-full rounded-control border border-line bg-card px-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
+        />
+        <div className="mt-auto flex flex-col gap-2">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              if (comment.trim()) {
+                navigator.clipboard?.writeText(comment).catch(() => {});
+              }
+              submit({ comment, contactName }, "high");
+            }}
+            className="w-full rounded-control bg-accent py-3 text-[15px] font-semibold text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
+          >
+            Copiar e ir a Google
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => submit({}, "high")}
+            className="w-full rounded-control border border-line bg-card py-2.5 text-[13px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
+          >
+            Ir directo a Google
+          </button>
+        </div>
+      </div>
+    );
+  } else if (!preview && terminal === "high") {
     body = (
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <CheckMark color="var(--green)" />

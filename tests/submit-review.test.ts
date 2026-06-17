@@ -18,4 +18,10 @@ describe("buildReviewCreateData", () => {
     expect(d.comment).toBe("lento");
     expect(d.contactName).toBe("Ana");
   });
+  it("5 estrellas con comentario: redirige a Google y conserva el texto", () => {
+    const d = buildReviewCreateData({ ...base, starRating: 5, comment: "Excelente trato", contactName: "Ana" });
+    expect(d.outcome).toBe("REDIRECTED_GOOGLE");
+    expect(d.comment).toBe("Excelente trato");
+    expect(d.contactName).toBe("Ana");
+  });
 });
