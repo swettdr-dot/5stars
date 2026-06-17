@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
 
@@ -41,6 +42,7 @@ export function EntityTable({
   activeLabel,
   trialLabel = "Prueba",
   emptyHint,
+  manageHref,
 }: {
   col1Label: string;
   col2Label: string;
@@ -49,6 +51,8 @@ export function EntityTable({
   activeLabel: string;
   trialLabel?: string;
   emptyHint: string;
+  /** Si se provee, cada fila enlaza a la gestión del negocio (panel de agencia). */
+  manageHref?: (id: string) => string;
 }) {
   return (
     <Card padding="p-0" className="overflow-hidden">
@@ -65,26 +69,35 @@ export function EntityTable({
       {rows.length === 0 ? (
         <div className="px-[18px] py-10 text-center text-meta text-ink-3">{emptyHint}</div>
       ) : (
-        rows.map((e, i) => (
-          <div
-            key={e.id}
-            className={`grid ${COLS} items-center gap-[14px] border-b border-line px-[18px] py-[14px] last:border-b-0`}
-          >
-            <div className="flex min-w-0 items-center gap-[11px]">
-              <Avatar name={e.name} index={i} />
-              <div className="min-w-0">
-                <div className="truncate text-[13.5px] font-semibold text-ink">{e.name}</div>
-                <div className="truncate text-[11.5px] text-ink-3">{e.sub}</div>
+        rows.map((e, i) => {
+          const inner = (
+            <>
+              <div className="flex min-w-0 items-center gap-[11px]">
+                <Avatar name={e.name} index={i} />
+                <div className="min-w-0">
+                  <div className="truncate text-[13.5px] font-semibold text-ink">{e.name}</div>
+                  <div className="truncate text-[11.5px] text-ink-3">{e.sub}</div>
+                </div>
               </div>
+              <span className="text-[13.5px] font-semibold text-ink">{e.col2}</span>
+              <span className="text-[13.5px] font-semibold text-ink">{e.reviews}</span>
+              <span className="text-[13.5px] font-semibold text-amber">{e.avg.toFixed(1)} ★</span>
+              <StatusBadge tone={e.active ? "active" : "trial"}>
+                {e.active ? activeLabel : trialLabel}
+              </StatusBadge>
+            </>
+          );
+          const cls = `grid ${COLS} items-center gap-[14px] border-b border-line px-[18px] py-[14px] last:border-b-0`;
+          return manageHref ? (
+            <Link key={e.id} href={manageHref(e.id)} className={`${cls} transition-colors hover:bg-canvas`}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={e.id} className={cls}>
+              {inner}
             </div>
-            <span className="text-[13.5px] font-semibold text-ink">{e.col2}</span>
-            <span className="text-[13.5px] font-semibold text-ink">{e.reviews}</span>
-            <span className="text-[13.5px] font-semibold text-amber">{e.avg.toFixed(1)} ★</span>
-            <StatusBadge tone={e.active ? "active" : "trial"}>
-              {e.active ? activeLabel : trialLabel}
-            </StatusBadge>
-          </div>
-        ))
+          );
+        })
       )}
     </Card>
   );

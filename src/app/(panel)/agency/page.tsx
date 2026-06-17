@@ -246,6 +246,7 @@ export default async function AgencyOverview({
           activeLabel="Activo"
           rows={rows}
           emptyHint="Aún no hay negocios. Crea el primero con &quot;+ Nuevo negocio&quot;."
+          manageHref={(id) => `/agency/${id}/questions`}
         />
       </section>
     </div>
