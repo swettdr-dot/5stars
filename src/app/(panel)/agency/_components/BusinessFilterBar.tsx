@@ -65,9 +65,10 @@ export function BusinessFilterBar({
             <button
               key={t.id}
               type="button"
-              onClick={() =>
-                navigate(t.id === "custom" ? { range: "custom" } : { range: t.id, from: null, to: null })
-              }
+              onClick={() => {
+                if (active) return; // evita navegación redundante al pulsar la pestaña activa
+                navigate(t.id === "custom" ? { range: "custom" } : { range: t.id, from: null, to: null });
+              }}
               className={`flex h-[34px] items-center rounded-[8px] border px-[13px] text-meta transition-colors ${
                 active
                   ? "border-line bg-card font-semibold text-ink"
@@ -90,7 +91,7 @@ export function BusinessFilterBar({
             className={inputCls}
             aria-label="Desde"
           />
-          <span className="text-meta text-ink-3">→</span>
+          <span className="text-meta text-ink-3" aria-hidden="true">→</span>
           <input
             type="date"
             value={to}
