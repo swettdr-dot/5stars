@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { aggregateMetrics, googlePct } from "@/lib/metrics";
+import { qrDataUrl } from "@/lib/qr";
+import { getBaseUrl } from "@/lib/base-url";
+import { sellerReviewLink } from "@/lib/public-links";
 import { resolveManageableBusiness } from "@/lib/business-access";
 import { BusinessTabs } from "../_components/BusinessTabs";
 import { SellersTable, type SellerRow } from "@/app/(panel)/business/sellers/_components/SellersTable";
@@ -21,22 +24,30 @@ export default async function AgencySellersPage({
     select: {
       id: true,
       name: true,
+      slug: true,
       user: { select: { email: true } },
       reviews: { select: { starRating: true, outcome: true } },
     },
   });
 
-  const rows: SellerRow[] = sellers.map((s) => {
-    const m = aggregateMetrics(s.reviews);
-    return {
-      id: s.id,
-      name: s.name,
-      email: s.user?.email ?? null,
-      reviews: m.total,
-      avg: m.average,
-      pct: googlePct(m),
-    };
-  });
+  const base = await getBaseUrl();
+  const rows: SellerRow[] = await Promise.all(
+    sellers.map(async (s) => {
+      const m = aggregateMetrics(s.reviews);
+      const link = sellerReviewLink(base, business.slug, s.slug);
+      return {
+        id: s.id,
+        name: s.name,
+        email: s.user?.email ?? null,
+        reviews: m.total,
+        avg: m.average,
+        pct: googlePct(m),
+        link,
+        slug: s.slug,
+        qr: await qrDataUrl(link),
+      };
+    }),
+  );
 
   return (
     <div>

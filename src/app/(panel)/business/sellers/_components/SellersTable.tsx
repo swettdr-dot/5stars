@@ -11,6 +11,12 @@ export type SellerRow = {
   avg: number;
   /** % de reseñas redirigidas a Google (0–100). */
   pct: number;
+  /** Enlace público propio del vendedor. */
+  link: string;
+  /** Slug del vendedor (para nombrar el archivo del QR descargado). */
+  slug: string;
+  /** Data URL (PNG) del código QR del enlace. */
+  qr: string;
 };
 
 const COLS = "grid grid-cols-[2fr_1fr_1fr_1.2fr] items-center gap-[14px] px-[18px]";

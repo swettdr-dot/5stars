@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { aggregateMetrics, googlePct } from "@/lib/metrics";
+import { qrDataUrl } from "@/lib/qr";
+import { getBaseUrl } from "@/lib/base-url";
+import { sellerReviewLink } from "@/lib/public-links";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SellersTable, type SellerRow } from "./_components/SellersTable";
 
@@ -15,22 +18,31 @@ export default async function SellersPage() {
     select: {
       id: true,
       name: true,
+      slug: true,
+      business: { select: { slug: true } },
       user: { select: { email: true } },
       reviews: { select: { starRating: true, outcome: true } },
     },
   });
 
-  const rows: SellerRow[] = sellers.map((s) => {
-    const m = aggregateMetrics(s.reviews);
-    return {
-      id: s.id,
-      name: s.name,
-      email: s.user?.email ?? null,
-      reviews: m.total,
-      avg: m.average,
-      pct: googlePct(m),
-    };
-  });
+  const base = await getBaseUrl();
+  const rows: SellerRow[] = await Promise.all(
+    sellers.map(async (s) => {
+      const m = aggregateMetrics(s.reviews);
+      const link = sellerReviewLink(base, s.business.slug, s.slug);
+      return {
+        id: s.id,
+        name: s.name,
+        email: s.user?.email ?? null,
+        reviews: m.total,
+        avg: m.average,
+        pct: googlePct(m),
+        link,
+        slug: s.slug,
+        qr: await qrDataUrl(link),
+      };
+    }),
+  );
 
   return (
     <div>
