@@ -8,6 +8,7 @@ import { z } from "zod";
 import { renderPostPng } from "@/lib/marketing/render";
 import { uploadPostImage, blobKey, deletePostImages } from "@/lib/marketing/storage";
 import { isTemplateKey } from "@/lib/marketing/templates";
+import { improveQuote } from "@/lib/marketing/ai";
 import type { PostFormat } from "@/lib/marketing/formats";
 import type { Prisma } from "@prisma/client";
 
@@ -176,4 +177,27 @@ export async function deletePost(postId: string): Promise<{ ok: boolean }> {
   await deletePostImages(urls).catch(() => {});
   revalidatePath("/marketing");
   return { ok: true };
+}
+
+export async function improveText(input: {
+  businessId: string;
+  text: string;
+}): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  let businessId: string;
+  try {
+    const { business } = await assertBusiness(input.businessId);
+    businessId = business.id;
+  } catch {
+    return { ok: false, error: "No autorizado." };
+  }
+  const kit = await prisma.brandKit.findUnique({
+    where: { businessId },
+    select: { toneOfVoice: true },
+  });
+  try {
+    const text = await improveQuote(input.text, kit?.toneOfVoice ?? null);
+    return { ok: true, text };
+  } catch {
+    return { ok: false, error: "El asistente no está disponible." };
+  }
 }

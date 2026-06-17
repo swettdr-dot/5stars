@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import { createPost } from "../actions";
+import { createPost, improveText } from "../actions";
 import { TEMPLATE_LIST, type TemplateKey } from "@/lib/marketing/templates";
 import { ALL_FORMATS, FORMAT_LABEL, type PostFormat } from "@/lib/marketing/formats";
 
@@ -97,6 +97,20 @@ export function PostEditor({
             maxLength={280}
             className="w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent"
           />
+          <button
+            type="button"
+            disabled={pending || !quoteText.trim()}
+            onClick={() =>
+              startTransition(async () => {
+                const res = await improveText({ businessId, text: quoteText });
+                if (res.ok) setQuoteText(res.text);
+                else setError(res.error);
+              })
+            }
+            className="mt-2 inline-flex w-fit items-center rounded-control border border-line px-3 py-1.5 text-meta font-semibold text-ink-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
+          >
+            ✨ Mejorar con IA
+          </button>
           <input
             value={attribution}
             onChange={(e) => setAttribution(e.target.value)}
