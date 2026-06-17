@@ -52,16 +52,17 @@ model Business {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  role         Role
-  agencyId     String?
-  agency       Agency?   @relation(fields: [agencyId], references: [id])
-  businessId   String?
-  business     Business? @relation(fields: [businessId], references: [id])
-  seller       Seller?
-  createdAt    DateTime  @default(now())
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  role           Role
+  agencyId       String?
+  agency         Agency?         @relation(fields: [agencyId], references: [id])
+  businessId     String?
+  business       Business?       @relation(fields: [businessId], references: [id])
+  seller         Seller?
+  marketingPosts MarketingPost[]
+  createdAt      DateTime        @default(now())
 }
 
 model Seller {
@@ -90,18 +91,18 @@ model Question {
 }
 
 model Review {
-  id           String        @id @default(cuid())
-  businessId   String
-  business     Business      @relation(fields: [businessId], references: [id])
-  sellerId     String?
-  seller       Seller?       @relation(fields: [sellerId], references: [id])
-  starRating   Int
-  outcome      ReviewOutcome
-  comment      String?
-  contactName  String?
-  contactPhone String?
-  contactEmail String?
-  createdAt    DateTime      @default(now())
+  id             String          @id @default(cuid())
+  businessId     String
+  business       Business        @relation(fields: [businessId], references: [id])
+  sellerId       String?
+  seller         Seller?         @relation(fields: [sellerId], references: [id])
+  starRating     Int
+  outcome        ReviewOutcome
+  comment        String?
+  contactName    String?
+  contactPhone   String?
+  contactEmail   String?
+  createdAt      DateTime        @default(now())
   answers        Answer[]
   marketingPosts MarketingPost[]
 }
@@ -146,6 +147,7 @@ model MarketingPost {
   imageSquareUrl String?
   imageStoryUrl  String?
   createdById    String
+  createdBy      User     @relation(fields: [createdById], references: [id])
   createdAt      DateTime @default(now())
 
   @@index([businessId, createdAt])
