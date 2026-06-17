@@ -56,10 +56,10 @@ export function BrandKitForm({
       </Card>
 
       <Card padding="p-5">
-        <div className="mb-3 text-card-title font-semibold text-ink">Tipograf&iacute;as</div>
+        <div className="mb-3 text-card-title font-semibold text-ink">Tipografías</div>
         <div className="grid grid-cols-2 gap-4">
           <label className="text-meta text-ink-2">
-            T&iacute;tulos
+            Títulos
             <select name="headingFont" defaultValue={values.headingFont} className="mt-1 h-10 w-full rounded-control border border-line bg-card px-3 text-body text-ink">
               {FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -75,20 +75,20 @@ export function BrandKitForm({
 
       <Card padding="p-5">
         <label className="mb-2 block text-card-title font-semibold text-ink">Tono de voz (opcional)</label>
-        <p className="mb-2 text-meta text-ink-2">Lo usa el asistente de IA al pulir el texto de la rese&ntilde;a.</p>
+        <p className="mb-2 text-meta text-ink-2">Lo usa el asistente de IA al pulir el texto de la reseña.</p>
         <textarea
           name="toneOfVoice"
           defaultValue={values.toneOfVoice ?? ""}
           rows={3}
           maxLength={280}
-          placeholder="Ej: cercano, c&aacute;lido, sin tecnicismos."
+          placeholder="Ej: cercano, cálido, sin tecnicismos."
           className="w-full resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent"
         />
       </Card>
 
       <Card padding="p-5">
         <label className="mb-2 block text-card-title font-semibold text-ink">Logo (opcional)</label>
-        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Peg&aacute; una URL para sobrescribirlo.</p>
+        <p className="mb-2 text-meta text-ink-2">Por defecto se usa el logo del negocio. Pegá una URL para sobrescribirlo.</p>
         <input
           type="url"
           name="logoOverrideUrl"
