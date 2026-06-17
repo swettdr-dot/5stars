@@ -129,7 +129,7 @@ export function ReviewFlow({
           type="button"
           onClick={() => submit({ comment, contactName, contactPhone }, "thanks")}
           disabled={pending}
-          className="mt-auto w-full rounded-control bg-accent py-3 text-[15px] font-semibold text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
+          className="mt-5 w-full rounded-control bg-accent py-3 text-[15px] font-semibold text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
         >
           Enviar
         </button>
@@ -243,7 +243,7 @@ export function ReviewFlow({
           />
         </div>
       </div>
-      <div className="flex flex-1 flex-col px-6 pb-7 pt-2">{body}</div>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-7 pt-2">{body}</div>
     </div>
   );
 }
