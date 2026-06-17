@@ -89,7 +89,12 @@ export function EntityTable({
           );
           const cls = `grid ${COLS} items-center gap-[14px] border-b border-line px-[18px] py-[14px] last:border-b-0`;
           return manageHref ? (
-            <Link key={e.id} href={manageHref(e.id)} className={`${cls} transition-colors hover:bg-canvas`}>
+            <Link
+              key={e.id}
+              href={manageHref(e.id)}
+              aria-label={`Gestionar ${e.name}`}
+              className={`${cls} transition-colors hover:bg-canvas`}
+            >
               {inner}
             </Link>
           ) : (
