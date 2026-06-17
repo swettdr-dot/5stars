@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import type { PostFormat } from "@/lib/marketing/formats";
 
 export function blobKey(businessId: string, postId: string, format: PostFormat): string {
@@ -14,4 +14,10 @@ export async function uploadPostImage(key: string, bytes: Uint8Array): Promise<s
     allowOverwrite: true,
   });
   return url;
+}
+
+/** Borra imágenes de Blob por URL (best-effort, para limpiar huérfanos). */
+export async function deletePostImages(urls: string[]): Promise<void> {
+  if (urls.length === 0) return;
+  await del(urls);
 }

@@ -1,12 +1,12 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireUser, type AppUser } from "@/lib/session";
 import { marketingBusinessWhere } from "@/lib/marketing/context";
 import { brandKitSchema, resolveBrandKit } from "@/lib/marketing/brand-kit";
 import { z } from "zod";
 import { renderPostPng } from "@/lib/marketing/render";
-import { uploadPostImage, blobKey } from "@/lib/marketing/storage";
+import { uploadPostImage, blobKey, deletePostImages } from "@/lib/marketing/storage";
 import { isTemplateKey } from "@/lib/marketing/templates";
 import type { PostFormat } from "@/lib/marketing/formats";
 import type { Prisma } from "@prisma/client";
@@ -17,18 +17,20 @@ export type BrandKitState = {
   error?: string;
 };
 
-/** Verifica que el usuario puede operar sobre `businessId`; devuelve el id o lanza. */
-async function assertBusiness(businessId: string): Promise<string> {
+/** Verifica que el usuario puede operar sobre `businessId`; devuelve el usuario y el negocio o lanza. */
+async function assertBusiness(
+  businessId: string,
+): Promise<{ user: AppUser; business: { id: string; name: string; logoUrl: string | null } }> {
   const user = await requireUser();
   if (user.role !== "BUSINESS_ADMIN" && user.role !== "AGENCY_ADMIN") {
     throw new Error("FORBIDDEN");
   }
-  const b = await prisma.business.findFirst({
+  const business = await prisma.business.findFirst({
     where: marketingBusinessWhere(user, businessId),
-    select: { id: true },
+    select: { id: true, name: true, logoUrl: true },
   });
-  if (!b) throw new Error("FORBIDDEN");
-  return b.id;
+  if (!business) throw new Error("FORBIDDEN");
+  return { user, business };
 }
 
 export async function saveBrandKit(
@@ -37,7 +39,8 @@ export async function saveBrandKit(
 ): Promise<BrandKitState> {
   let businessId: string;
   try {
-    businessId = await assertBusiness(String(formData.get("businessId") ?? ""));
+    const { business } = await assertBusiness(String(formData.get("businessId") ?? ""));
+    businessId = business.id;
   } catch {
     return { ok: false, error: "No tenés permisos para este negocio." };
   }
@@ -103,19 +106,14 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
   }
   const input = parsed.data;
 
-  let businessId: string;
+  let user: AppUser;
+  let business: { id: string; name: string; logoUrl: string | null };
   try {
-    businessId = await assertBusiness(input.businessId);
+    ({ user, business } = await assertBusiness(input.businessId));
   } catch {
     return { ok: false, error: "No tenés permisos para este negocio." };
   }
-
-  const user = await requireUser();
-  const business = await prisma.business.findUnique({
-    where: { id: businessId },
-    select: { name: true, logoUrl: true },
-  });
-  if (!business) return { ok: false, error: "Negocio no encontrado." };
+  const businessId = business.id;
 
   const kitRow = await prisma.brandKit.findUnique({ where: { businessId } });
   const kit = resolveBrandKit(kitRow, business.logoUrl);
@@ -133,8 +131,8 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
     },
   });
 
+  const urls: Partial<Record<PostFormat, string>> = {};
   try {
-    const urls: Partial<Record<PostFormat, string>> = {};
     for (const format of input.formats as PostFormat[]) {
       const png = await renderPostPng({
         templateKey: input.templateKey as Parameters<typeof renderPostPng>[0]["templateKey"],
@@ -155,8 +153,9 @@ export async function createPost(raw: unknown): Promise<CreatePostResult> {
       },
     });
   } catch {
-    // Limpieza: sin imágenes la fila no sirve.
+    // Limpieza: sin imágenes la fila no sirve; borrar fila y blobs ya subidos.
     await prisma.marketingPost.delete({ where: { id: post.id } }).catch(() => {});
+    await deletePostImages(Object.values(urls)).catch(() => {});
     return { ok: false, error: "No se pudo generar la imagen. Intentá de nuevo." };
   }
 
