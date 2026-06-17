@@ -8,8 +8,8 @@ export default async function PublicReview({ params }: { params: Promise<{ busin
   if (!ctx) notFound();
   const { business, sellerId } = ctx;
   return (
-    <main className="flex min-h-screen justify-center bg-canvas">
-      <div className="flex w-full max-w-[420px] flex-1 flex-col bg-card">
+    <main className="flex h-dvh justify-center bg-canvas">
+      <div className="flex h-full w-full max-w-[420px] flex-col bg-card">
         <ReviewFlow
           businessId={business.id}
           sellerId={sellerId}
