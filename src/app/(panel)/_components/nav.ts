@@ -12,13 +12,17 @@ type Role = SessionUser["role"];
  */
 export const NAV: Record<Role, NavItem[]> = {
   SUPER_ADMIN: [{ href: "/super", label: "Agencias", icon: "building" }],
-  AGENCY_ADMIN: [{ href: "/agency", label: "Negocios", icon: "briefcase" }],
+  AGENCY_ADMIN: [
+    { href: "/agency", label: "Negocios", icon: "briefcase" },
+    { href: "/marketing", label: "Marketing", icon: "image" },
+  ],
   BUSINESS_ADMIN: [
     { href: "/business", label: "Resumen", icon: "home" },
     { href: "/business/reviews", label: "Reseñas", icon: "chat" },
     { href: "/business/questions", label: "Preguntas", icon: "list" },
     { href: "/business/sellers", label: "Vendedores", icon: "users" },
     { href: "/business/qr", label: "Mi QR / Enlace", icon: "qr" },
+    { href: "/marketing", label: "Marketing", icon: "image" },
     { href: "/business/settings", label: "Ajustes", icon: "gear" },
   ],
   SELLER: [{ href: "/seller", label: "Mi panel", icon: "chart" }],

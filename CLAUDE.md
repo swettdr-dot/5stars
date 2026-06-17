@@ -157,6 +157,8 @@ Enums: `Role`, `QuestionType`, `ReviewOutcome`.
 - `DATABASE_URL` — conexión Postgres (pooled).
 - `DIRECT_URL` — conexión directa para migraciones Prisma.
 - `AUTH_SECRET` — secret de Auth.js (NextAuth v5).
+- `BLOB_READ_WRITE_TOKEN` — token de Vercel Blob para guardar imágenes de marketing.
+- `ANTHROPIC_API_KEY` — opcional; habilita el asistente de texto IA del editor.
 
 ---
 

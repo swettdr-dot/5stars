@@ -47,19 +47,22 @@ model Business {
   sellers         Seller[]
   questions       Question[]
   reviews         Review[]
+  brandKit        BrandKit?
+  marketingPosts  MarketingPost[]
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  role         Role
-  agencyId     String?
-  agency       Agency?   @relation(fields: [agencyId], references: [id])
-  businessId   String?
-  business     Business? @relation(fields: [businessId], references: [id])
-  seller       Seller?
-  createdAt    DateTime  @default(now())
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  role           Role
+  agencyId       String?
+  agency         Agency?         @relation(fields: [agencyId], references: [id])
+  businessId     String?
+  business       Business?       @relation(fields: [businessId], references: [id])
+  seller         Seller?
+  marketingPosts MarketingPost[]
+  createdAt      DateTime        @default(now())
 }
 
 model Seller {
@@ -88,19 +91,20 @@ model Question {
 }
 
 model Review {
-  id           String        @id @default(cuid())
-  businessId   String
-  business     Business      @relation(fields: [businessId], references: [id])
-  sellerId     String?
-  seller       Seller?       @relation(fields: [sellerId], references: [id])
-  starRating   Int
-  outcome      ReviewOutcome
-  comment      String?
-  contactName  String?
-  contactPhone String?
-  contactEmail String?
-  createdAt    DateTime      @default(now())
-  answers      Answer[]
+  id             String          @id @default(cuid())
+  businessId     String
+  business       Business        @relation(fields: [businessId], references: [id])
+  sellerId       String?
+  seller         Seller?         @relation(fields: [sellerId], references: [id])
+  starRating     Int
+  outcome        ReviewOutcome
+  comment        String?
+  contactName    String?
+  contactPhone   String?
+  contactEmail   String?
+  createdAt      DateTime        @default(now())
+  answers        Answer[]
+  marketingPosts MarketingPost[]
 }
 
 model Answer {
@@ -110,4 +114,41 @@ model Answer {
   questionId String
   question   Question @relation(fields: [questionId], references: [id])
   value      String
+}
+
+model BrandKit {
+  id              String   @id @default(cuid())
+  businessId      String   @unique
+  business        Business @relation(fields: [businessId], references: [id])
+  primary         String   @default("#D97706")
+  accent          String   @default("#16A34A")
+  background      String   @default("#FFFFFF")
+  text            String   @default("#1A1A1E")
+  colors          String[] @default([])
+  headingFont     String   @default("Playfair Display")
+  bodyFont        String   @default("Inter")
+  backgrounds     String[] @default([])
+  toneOfVoice     String?
+  logoOverrideUrl String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MarketingPost {
+  id             String   @id @default(cuid())
+  businessId     String
+  business       Business @relation(fields: [businessId], references: [id])
+  reviewId       String?
+  review         Review?  @relation(fields: [reviewId], references: [id])
+  templateKey    String
+  quoteText      String
+  starRating     Int
+  attribution    String?
+  imageSquareUrl String?
+  imageStoryUrl  String?
+  createdById    String
+  createdBy      User     @relation(fields: [createdById], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@index([businessId, createdAt])
 }

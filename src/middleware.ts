@@ -6,12 +6,21 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
-  const isPanel = ["/super", "/agency", "/business", "/seller"].some((p) =>
+  const isPanel = ["/super", "/agency", "/business", "/seller", "/marketing"].some((p) =>
     req.nextUrl.pathname.startsWith(p),
   );
   if (isPanel && !req.auth) {
-    return Response.redirect(new URL("/login", req.nextUrl.origin));
+    const url = new URL("/login", req.nextUrl.origin);
+    return Response.redirect(url);
   }
 });
 
-export const config = { matcher: ["/super/:path*", "/agency/:path*", "/business/:path*", "/seller/:path*"] };
+export const config = {
+  matcher: [
+    "/super/:path*",
+    "/agency/:path*",
+    "/business/:path*",
+    "/seller/:path*",
+    "/marketing/:path*",
+  ],
+};

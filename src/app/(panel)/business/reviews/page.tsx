@@ -152,6 +152,14 @@ export default async function BusinessReviews({
                   Vendedor: {r.seller?.name ?? "Sin vendedor"}
                   {contact && ` · Contacto: ${contact}`}
                 </div>
+                {r.comment?.trim() && (
+                  <Link
+                    href={`/marketing/new?reviewId=${r.id}`}
+                    className="mt-2 inline-flex items-center rounded-control border border-line px-3 py-1 text-[11.5px] font-semibold text-ink-2 transition-colors hover:border-accent hover:text-accent"
+                  >
+                    Crear publicación
+                  </Link>
+                )}
               </div>
             </div>
           );
