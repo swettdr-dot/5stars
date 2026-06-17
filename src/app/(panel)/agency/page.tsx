@@ -55,6 +55,13 @@ export default async function AgencyOverview({
   const selected = businesses.find((b) => b.id === sp.business) ?? null;
   const businessId = selected?.id ?? null;
 
+  // Pestaña elegida por el usuario (estado de la UI). Difiere de `win.range`: al
+  // elegir "Personalizado" sin fechas válidas, las métricas caen a "este mes"
+  // (win.range="month") pero la barra debe seguir mostrando "Personalizado"
+  // activo con los campos de fecha, para que el usuario pueda completarlas.
+  const selectedRange =
+    sp.range === "week" || sp.range === "custom" ? sp.range : "month";
+
   // Reseñas acotadas al negocio seleccionado (o todas las de la agencia).
   const scoped = businessId ? reviews.filter((r) => r.businessId === businessId) : reviews;
   const scopedLikes = scoped.map((r) => ({
@@ -162,7 +169,7 @@ export default async function AgencyOverview({
             <BusinessFilterBar
               businesses={businesses.map((b) => ({ id: b.id, name: b.name }))}
               business={businessId}
-              range={win.range}
+              range={selectedRange}
               from={sp.from ?? ""}
               to={sp.to ?? ""}
             />
