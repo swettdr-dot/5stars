@@ -35,7 +35,12 @@ export default async function QuestionsPage() {
           </Link>
         }
       />
-      <QuestionsBuilder business={business} questions={questions} />
+      <QuestionsBuilder
+        business={business}
+        questions={questions}
+        businessId={user.businessId}
+        canEdit={false}
+      />
     </div>
   );
 }

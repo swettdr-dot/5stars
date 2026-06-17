@@ -20,6 +20,8 @@ export default async function SettingsPage() {
         subtitle="Configura el comportamiento del flujo de reseñas y la marca."
       />
       <SettingsForm
+        businessId={user.businessId}
+        canEdit={false}
         defaults={{
           googleReviewUrl: business.googleReviewUrl,
           logoUrl: business.logoUrl ?? "",

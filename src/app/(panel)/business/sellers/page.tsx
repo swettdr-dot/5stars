@@ -3,7 +3,6 @@ import { requireUser } from "@/lib/session";
 import { aggregateMetrics, googlePct } from "@/lib/metrics";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SellersTable, type SellerRow } from "./_components/SellersTable";
-import { NewSellerDialog } from "./_components/NewSellerDialog";
 
 export default async function SellersPage() {
   const user = await requireUser();
@@ -38,7 +37,6 @@ export default async function SellersPage() {
       <PageHeader
         title="Vendedores"
         subtitle="Cada uno tiene su propio link/QR para atribuir reseñas."
-        actions={<NewSellerDialog />}
       />
       <SellersTable rows={rows} />
     </div>
