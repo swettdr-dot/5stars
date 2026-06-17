@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { resolveManageableBusiness } from "@/lib/business-access";
 import { slugify } from "@/lib/slug";
 import { hashPassword } from "@/lib/password";
 
@@ -35,8 +35,10 @@ export async function createSeller(
   _prev: CreateSellerState,
   formData: FormData,
 ): Promise<CreateSellerState> {
-  const user = await requireUser();
-  if (user.role !== "BUSINESS_ADMIN" || !user.businessId) {
+  const businessId = String(formData.get("businessId"));
+  try {
+    await resolveManageableBusiness(businessId);
+  } catch {
     return { ok: false, error: "No autorizado." };
   }
 
@@ -53,13 +55,13 @@ export async function createSeller(
   // Slug único dentro del negocio (Seller.@@unique([businessId, slug])).
   const base = slugify(data.name);
   const existing = await prisma.seller.count({
-    where: { businessId: user.businessId, slug: { startsWith: base } },
+    where: { businessId, slug: { startsWith: base } },
   });
   const slug = existing === 0 ? base : `${base}-${existing + 1}`;
 
   try {
     const seller = await prisma.seller.create({
-      data: { name: data.name, slug, businessId: user.businessId },
+      data: { name: data.name, slug, businessId },
     });
     if (data.email && data.password) {
       const u = await prisma.user.create({
@@ -67,7 +69,7 @@ export async function createSeller(
           email: data.email,
           passwordHash: await hashPassword(data.password),
           role: "SELLER",
-          businessId: user.businessId,
+          businessId,
         },
       });
       await prisma.seller.update({ where: { id: seller.id }, data: { userId: u.id } });
@@ -79,6 +81,7 @@ export async function createSeller(
     throw e;
   }
 
+  revalidatePath(`/agency/${businessId}/sellers`);
   revalidatePath("/business/sellers");
   return { ok: true };
 }
