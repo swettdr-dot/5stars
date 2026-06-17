@@ -41,7 +41,7 @@ export function elegante(p: TemplateProps): ReactElement {
             marginTop: 28,
           }}
         >
-          "{p.quote}"
+          {"“"}{p.quote}{"”"}
         </span>
       </div>
       <span style={{ fontSize: 36, fontWeight: 700, color: p.kit.primary }}>
