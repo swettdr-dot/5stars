@@ -168,10 +168,12 @@ export async function deletePost(postId: string): Promise<{ ok: boolean }> {
   // Acota el borrado al alcance del rol vía relación business.
   const post = await prisma.marketingPost.findFirst({
     where: { id: postId, business: marketingBusinessWhere(user) as Prisma.BusinessWhereInput },
-    select: { id: true },
+    select: { id: true, imageSquareUrl: true, imageStoryUrl: true },
   });
   if (!post) return { ok: false };
   await prisma.marketingPost.delete({ where: { id: post.id } });
+  const urls = [post.imageSquareUrl, post.imageStoryUrl].filter((u): u is string => Boolean(u));
+  await deletePostImages(urls).catch(() => {});
   revalidatePath("/marketing");
   return { ok: true };
 }

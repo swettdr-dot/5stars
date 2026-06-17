@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { createPost } from "../actions";
@@ -24,11 +24,21 @@ export function PostEditor({
   const [attribution, setAttribution] = useState(initial.attribution);
   const [formats, setFormats] = useState<PostFormat[]>(["SQUARE"]);
 
+  const [debouncedQuote, setDebouncedQuote] = useState(initial.quoteText);
+  const [debouncedAttribution, setDebouncedAttribution] = useState(initial.attribution);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedQuote(quoteText);
+      setDebouncedAttribution(attribution);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [quoteText, attribution]);
+
   const previewUrl =
     `/marketing/preview?businessId=${encodeURIComponent(businessId)}` +
     `&templateKey=${templateKey}&format=${previewFormat}` +
-    `&rating=${initial.starRating}&quote=${encodeURIComponent(quoteText)}` +
-    `&attribution=${encodeURIComponent(attribution)}`;
+    `&rating=${initial.starRating}&quote=${encodeURIComponent(debouncedQuote)}` +
+    `&attribution=${encodeURIComponent(debouncedAttribution)}`;
 
   function toggleFormat(f: PostFormat) {
     setFormats((cur) => (cur.includes(f) ? cur.filter((x) => x !== f) : [...cur, f]));
@@ -139,7 +149,7 @@ export function PostEditor({
           key={previewUrl}
           src={previewUrl}
           alt="Vista previa"
-          className="w-full rounded-control border border-line"
+          className="w-full max-h-[60vh] object-contain rounded-control border border-line"
         />
       </Card>
     </div>

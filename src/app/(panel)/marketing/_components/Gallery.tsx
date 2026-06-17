@@ -54,7 +54,10 @@ export function Gallery({ items, businessId }: { items: GalleryItem[]; businessI
               <button
                 type="button"
                 disabled={pending}
-                onClick={() => startTransition(() => void deletePost(it.id))}
+                onClick={() => {
+                  if (!window.confirm("¿Borrar esta publicación? No se puede deshacer.")) return;
+                  startTransition(() => void deletePost(it.id));
+                }}
                 className="ml-auto rounded-control px-3 py-1 text-meta text-red hover:bg-red-bg disabled:opacity-60"
               >
                 Borrar
