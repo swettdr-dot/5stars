@@ -65,11 +65,14 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editType, setEditType] = useState<"MULTIPLE_CHOICE" | "TEXT">("MULTIPLE_CHOICE");
   const [editState, editAction, editPending] = useActionState(updateQuestion, { ok: false });
-  // Cierra el form de edición al guardar con éxito (patrón "estado previo").
+  // Cierra el form al guardar con éxito; recuerda a qué pregunta pertenece un error
+  // para no mostrarlo al abrir la edición de otra (patrón "estado previo").
   const [seenEdit, setSeenEdit] = useState(editState);
+  const [errorForId, setErrorForId] = useState<string | null>(null);
   if (seenEdit !== editState) {
     setSeenEdit(editState);
     if (editState.ok) setEditingId(null);
+    else setErrorForId(editState.error ? editingId : null);
   }
   const setPreviewStep = (n: number) => setPreviewStepRaw(Math.min(Math.max(n, 0), ratingStep));
   const step = Math.min(previewStep, ratingStep);
@@ -115,7 +118,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                       className="resize-none rounded-control border border-line bg-card p-3 text-body text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--ac-bg)]"
                     />
                   )}
-                  {editState.error && (
+                  {editState.error && errorForId === q.id && (
                     <p role="alert" className="text-meta text-red">
                       {editState.error}
                     </p>
@@ -154,7 +157,7 @@ export function QuestionsBuilder({ business, questions }: { business: Business; 
                   selected ? "border-accent bg-accent-weak" : "border-line bg-card hover:border-[#dcdce3]"
                 }`}
               >
-                <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastrá para reordenar">
+                <span className="cursor-grab select-none pt-0.5 text-[9px] leading-[0.7] text-ink-3" title="Arrastra para reordenar">
                   ⋮⋮
                 </span>
                 <span className="flex size-[26px] shrink-0 items-center justify-center rounded-[7px] bg-accent-bg text-meta font-semibold text-accent-dark">
