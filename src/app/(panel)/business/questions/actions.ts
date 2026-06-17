@@ -71,3 +71,27 @@ export async function toggleQuestion(formData: FormData) {
   if (q) await prisma.question.update({ where: { id }, data: { active: !q.active } });
   revalidatePath("/business/questions");
 }
+
+export async function updateQuestion(
+  _prev: QuestionFormState,
+  formData: FormData,
+): Promise<QuestionFormState> {
+  const businessId = await ownBusinessId();
+  const id = String(formData.get("id"));
+  // Verifica pertenencia al negocio (igual que delete/toggle).
+  const owned = await prisma.question.findFirst({ where: { id, businessId }, select: { id: true } });
+  if (!owned) return { ok: false, error: "Pregunta no encontrada." };
+  const parsed = parseQuestionInput({
+    text: formData.get("text"),
+    type: formData.get("type"),
+    options: formData.get("options"),
+  });
+  if (!parsed.ok) return { ok: false, error: parsed.error };
+  // No toca order ni active.
+  await prisma.question.update({
+    where: { id },
+    data: { text: parsed.data.text, type: parsed.data.type, options: parsed.data.options },
+  });
+  revalidatePath("/business/questions");
+  return { ok: true };
+}
