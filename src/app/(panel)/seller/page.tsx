@@ -14,7 +14,7 @@ import { KpiCard, type KpiDir } from "@/components/ui/KpiCard";
 import { DistributionChart } from "@/components/charts/DistributionChart";
 import { RatingDonut } from "@/components/charts/RatingDonut";
 import { TrendChart } from "@/components/charts/TrendChart";
-import { CopyButton } from "./_components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 const DAY_MS = 86_400_000;
 const RANGE_DAYS = 30;
