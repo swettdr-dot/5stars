@@ -21,7 +21,7 @@ export function Gallery({ items, businessId }: { items: GalleryItem[]; businessI
         <p className="text-center text-body text-ink-2">
           Aún no hay publicaciones.{" "}
           <Link href={`/marketing/new?businessId=${businessId}`} className="font-semibold text-accent">
-            Creá la primera
+            Crea la primera
           </Link>
           .
         </p>

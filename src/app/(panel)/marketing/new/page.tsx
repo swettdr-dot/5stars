@@ -32,7 +32,7 @@ export default async function NewPostPage({
 
   return (
     <div>
-      <PageHeader title="Crear publicación" subtitle="Elegí plantilla, ajustá el texto y generá la imagen." />
+      <PageHeader title="Crear publicación" subtitle="Elige la plantilla, ajusta el texto y genera la imagen." />
       <PostEditor
         businessId={ctx.business.id}
         initial={{ reviewId, quoteText, starRating, attribution }}

@@ -69,7 +69,7 @@ const dataOrHttpUrl = z
   .trim()
   .refine(
     (v) => /^https?:\/\//i.test(v) || /^data:image\//i.test(v),
-    "Subí una imagen o pegá una URL válida.",
+    "Sube una imagen o pega una URL válida.",
   );
 
 export const brandKitSchema = z.object({
